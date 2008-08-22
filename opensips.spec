@@ -4,6 +4,7 @@
 %bcond_without	pgsql		# PostgreSQL support
 %bcond_without	odbc		# ODBC support
 %bcond_without	radius		# radius support
+%bcond_without	carrierroute	# carrierroute support
 %bcond_with	osp		# ETSI OSP VoIP Peering support
 #
 Summary:	SIP proxy, redirect and registrar server
@@ -22,7 +23,7 @@ URL:		http://www.opensips.org/
 BuildRequires:	bison
 BuildRequires:	expat-devel
 BuildRequires:	flex
-BuildRequires:	libconfuse-devel
+%{?with_carrierroute:BuildRequires:	libconfuse-devel}
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
 BuildRequires:	libxml2-devel
 %{?with_mysql:BuildRequires:	mysql-devel}
@@ -155,6 +156,9 @@ find -type d -name CVS | xargs rm -rf
 
 %build
 exclude_modules="%{exclude_modules}"
+%if %{without carrierroute}
+exclude_modules="$exclude_modules carrierroute"
+%endif
 %if %{without osp}
 exclude_modules="$exclude_modules osp"
 %endif
@@ -247,7 +251,9 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/auth_diameter.so
 %attr(755,root,root) %{_libdir}/opensips/modules/avpops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/benchmark.so
+%if %{with carrierroute}
 %attr(755,root,root) %{_libdir}/opensips/modules/carrierroute.so
+%endif
 %attr(755,root,root) %{_libdir}/opensips/modules/cfgutils.so
 %attr(755,root,root) %{_libdir}/opensips/modules/cpl-c.so
 %attr(755,root,root) %{_libdir}/opensips/modules/db_berkeley.so
