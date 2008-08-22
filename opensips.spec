@@ -17,7 +17,6 @@ Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-tls_
 # Source0-md5:	c5479825be16170b014da66d06dfdf04
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
-Patch0:		%{name}-paths.patch
 URL:		http://www.opensips.org/
 %{?with_osp:BuildRequires:	OSPToolkit}
 BuildRequires:	bison
@@ -151,7 +150,6 @@ MIB-y dla openSIPS.
 
 %prep
 %setup -q -n %{name}-%{version}-tls
-#%patch0 -p1
 
 find -type d -name CVS | xargs rm -rf
 
