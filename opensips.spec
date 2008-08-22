@@ -163,13 +163,13 @@ exclude_modules="$exclude_modules carrierroute"
 exclude_modules="$exclude_modules osp"
 %endif
 %if %{without mysql}
-exclude_modules="$exclude_modules mysql"
+exclude_modules="$exclude_modules db_mysql"
 %endif
 %if %{without pgsql}
-exclude_modules="$exclude_modules postgres"
+exclude_modules="$exclude_modules db_postgres"
 %endif
 %if %{without odbc}
-exclude_modules="$exclude_modules unixodbc"
+exclude_modules="$exclude_modules db_unixodbc"
 %endif
 %if %{without radius}
 exclude_modules="$exclude_modules auth_radius avp_radius group_radius uri_radius"
