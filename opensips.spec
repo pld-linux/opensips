@@ -177,7 +177,7 @@ exclude_modules="$exclude_modules db_postgres"
 exclude_modules="$exclude_modules db_unixodbc"
 %endif
 %if %{without radius}
-exclude_modules="$exclude_modules auth_radius avp_radius group_radius uri_radius"
+exclude_modules="$exclude_modules auth_radius avp_radius group_radius uri_radius peering"
 %endif
 echo "$exclude_modules" > exclude_modules
 %{__make} all \
