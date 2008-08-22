@@ -5,6 +5,7 @@
 %bcond_without	odbc		# ODBC support
 %bcond_without	radius		# radius support
 %bcond_without	carrierroute	# carrierroute support
+%bcond_without	ldap		# LDAP support
 %bcond_with	osp		# ETSI OSP VoIP Peering support
 #
 Summary:	SIP proxy, redirect and registrar server
@@ -28,6 +29,7 @@ BuildRequires:	flex
 BuildRequires:	libxml2-devel
 %{?with_mysql:BuildRequires:	mysql-devel}
 BuildRequires:	net-snmp-devel
+%{?with_ldap:BuildRequires:	openldap-devel}
 BuildRequires:	openssl-devel
 BuildRequires:	perl-devel
 %{?with_radius:BuildRequires:	radiusclient-ng-devel}
@@ -156,6 +158,9 @@ find -type d -name CVS | xargs rm -rf
 
 %build
 exclude_modules="%{exclude_modules}"
+%if %{without ldap}
+exclude_modules="$exclude_modules h350 ldap"
+%endif
 %if %{without carrierroute}
 exclude_modules="$exclude_modules carrierroute"
 %endif
@@ -269,10 +274,14 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/exec.so
 %attr(755,root,root) %{_libdir}/opensips/modules/gflags.so
 %attr(755,root,root) %{_libdir}/opensips/modules/group.so
+%if %{with ldap}
 %attr(755,root,root) %{_libdir}/opensips/modules/h350.so
+%endif
 %attr(755,root,root) %{_libdir}/opensips/modules/imc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/lcr.so
+%if %{with ldap}
 %attr(755,root,root) %{_libdir}/opensips/modules/ldap.so
+%endif
 %attr(755,root,root) %{_libdir}/opensips/modules/mangler.so
 %attr(755,root,root) %{_libdir}/opensips/modules/maxfwd.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mediaproxy.so
