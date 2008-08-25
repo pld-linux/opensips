@@ -39,6 +39,7 @@ BuildRequires:	rpmbuild(macros) >= 1.268
 BuildRequires:	zlib-devel
 Requires(post,preun):	/sbin/chkconfig
 Requires:	rc-scripts
+Suggests:	python-modules
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # mi_xmlrpc requires xmlrpc-c-devel in version 1.9 only
@@ -246,7 +247,10 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/opensips
 %attr(754,root,root) /etc/rc.d/init.d/opensips
 %dir %{_libdir}/opensips
-%{_libdir}/opensips/opensipsctl
+%dir %{_libdir}/opensips/opensipsctl
+%{_libdir}/opensips/opensipsctl/*.*
+%dir %{_libdir}/opensips/opensipsctl/dbtextdb
+%attr(755,root,root) %{_libdir}/opensips/opensipsctl/dbtextdb/dbtextdb.py
 %dir %{_libdir}/opensips/modules
 # explict list here, no globs please (to avoid mistakes)
 %attr(755,root,root) %{_libdir}/opensips/modules/acc.so
