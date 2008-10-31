@@ -25,6 +25,7 @@ BuildRequires:	bison
 BuildRequires:	expat-devel
 BuildRequires:	flex
 %{?with_carrierroute:BuildRequires:	libconfuse-devel}
+BuildRequires:	curl-devel
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
 BuildRequires:	libxml2-devel
 %{?with_mysql:BuildRequires:	mysql-devel}
