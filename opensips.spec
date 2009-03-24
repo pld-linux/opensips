@@ -7,19 +7,21 @@
 %bcond_without	carrierroute	# carrierroute support
 %bcond_without	ldap		# LDAP support
 %bcond_with	osp		# ETSI OSP VoIP Peering support
+%bcond_without	geoip		# GeoIP
 #
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
-Version:	1.4.4
+Version:	1.5.0
 Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-tls_src.tar.gz
-# Source0-md5:	cd54f9a4892754e59dc85732135b1fae
+# Source0-md5:	ba2a21dfafbd22027a72e95c82a3c9a6
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 URL:		http://www.opensips.org/
+%{?with_geoip:BuildRequires:	GeoIP-devel}
 %{?with_osp:BuildRequires:	OSPToolkit}
 BuildRequires:	bison
 BuildRequires:	expat-devel
@@ -128,6 +130,54 @@ XMPP/Jabber modules for openSIPS.
 %description xmpp -l pl.UTF-8
 Moduły XMPP/Jabber do openSIPS.
 
+%package ldap
+Summary:	openSIPS LDAP and H350 modules
+Summary(pl.UTF-8):	Moduły LDAP i H350 do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description ldap
+LDAP and H350  modules for openSIPS.
+
+%description ldap -l pl.UTF-8
+Moduły LDAP i H350 do openSIPS.
+
+%package carrierroute
+Summary:	openSIPS Carrierroute module
+Summary(pl.UTF-8):	Moduł Carrierroute do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description carrierroute
+Carrierroute module for openSIPS.
+
+%description carrierroute -l pl.UTF-8
+Moduł Carrierroute do openSIPS.
+
+%package osp
+Summary:	openSIPS OSP module
+Summary(pl.UTF-8):	Moduł OSP do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description osp
+OSP module for openSIPS.
+
+%description osp -l pl.UTF-8
+Moduł OSP do openSIPS.
+
+%package mmgeoip
+Summary:	openSIPS MaxMind GeoIP module
+Summary(pl.UTF-8):	Moduł MaxMind GeoIP do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description mmgeoip
+MaxMind GeoIP module for openSIPS.
+
+%description mmgeoip -l pl.UTF-8
+Moduł MaxMind GeoIP do openSIPS.
+
 %package snmpstats
 Summary:	openSIPS SNMP statistics module
 Summary(pl.UTF-8):	Moduł do statystyk SNMP do openSIPS
@@ -177,6 +227,9 @@ exclude_modules="$exclude_modules db_postgres"
 %endif
 %if %{without odbc}
 exclude_modules="$exclude_modules db_unixodbc"
+%endif
+%if %{without geoip}
+exclude_modules="$exclude_modules mmgeoip"
 %endif
 %if %{without radius}
 exclude_modules="$exclude_modules auth_radius avp_radius group_radius uri_radius peering"
@@ -240,11 +293,12 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc README* TODO scripts examples
+%doc README* AUTHORS CREDITS ChangeLog INSTALL NEWS scripts examples
 %attr(755,root,root) %{_sbindir}/*
 %dir %{_sysconfdir}/opensips
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensips.cfg
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensipsctlrc
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/osipsconsolerc
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/opensips
 %attr(754,root,root) /etc/rc.d/init.d/opensips
 %dir %{_libdir}/opensips
@@ -261,10 +315,9 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/auth_diameter.so
 %attr(755,root,root) %{_libdir}/opensips/modules/avpops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/benchmark.so
-%if %{with carrierroute}
-%attr(755,root,root) %{_libdir}/opensips/modules/carrierroute.so
-%endif
+%attr(755,root,root) %{_libdir}/opensips/modules/call_control.so
 %attr(755,root,root) %{_libdir}/opensips/modules/cfgutils.so
+%attr(755,root,root) %{_libdir}/opensips/modules/closeddial.so
 %attr(755,root,root) %{_libdir}/opensips/modules/cpl-c.so
 %attr(755,root,root) %{_libdir}/opensips/modules/db_berkeley.so
 %attr(755,root,root) %{_libdir}/opensips/modules/db_flatstore.so
@@ -275,18 +328,16 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/diversion.so
 %attr(755,root,root) %{_libdir}/opensips/modules/domain.so
 %attr(755,root,root) %{_libdir}/opensips/modules/domainpolicy.so
+%attr(755,root,root) %{_libdir}/opensips/modules/drouting.so
 %attr(755,root,root) %{_libdir}/opensips/modules/enum.so
 %attr(755,root,root) %{_libdir}/opensips/modules/exec.so
 %attr(755,root,root) %{_libdir}/opensips/modules/gflags.so
 %attr(755,root,root) %{_libdir}/opensips/modules/group.so
-%if %{with ldap}
-%attr(755,root,root) %{_libdir}/opensips/modules/h350.so
-%endif
+%attr(755,root,root) %{_libdir}/opensips/modules/identity.so
 %attr(755,root,root) %{_libdir}/opensips/modules/imc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/lcr.so
-%if %{with ldap}
-%attr(755,root,root) %{_libdir}/opensips/modules/ldap.so
-%endif
+%attr(755,root,root) %{_libdir}/opensips/modules/load_balancer.so
+%attr(755,root,root) %{_libdir}/opensips/modules/localcache.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mangler.so
 %attr(755,root,root) %{_libdir}/opensips/modules/maxfwd.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mediaproxy.so
@@ -296,25 +347,28 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/nat_traversal.so
 %attr(755,root,root) %{_libdir}/opensips/modules/nathelper.so
 %attr(755,root,root) %{_libdir}/opensips/modules/options.so
-%if %{with osp}
-%attr(755,root,root) %{_libdir}/opensips/modules/osp.so
-%endif
 %attr(755,root,root) %{_libdir}/opensips/modules/path.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pdt.so
 %attr(755,root,root) %{_libdir}/opensips/modules/permissions.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pike.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence.so
+%attr(755,root,root) %{_libdir}/opensips/modules/presence_dialoginfo.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_mwi.so
+%attr(755,root,root) %{_libdir}/opensips/modules/presence_xcapdiff.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_xml.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pua.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pua_bla.so
+%attr(755,root,root) %{_libdir}/opensips/modules/pua_dialoginfo.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pua_mi.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pua_usrloc.so
+%attr(755,root,root) %{_libdir}/opensips/modules/qos.so
 %attr(755,root,root) %{_libdir}/opensips/modules/ratelimit.so
+%attr(755,root,root) %{_libdir}/opensips/modules/regex.so
 %attr(755,root,root) %{_libdir}/opensips/modules/registrar.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rls.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rr.so
 %attr(755,root,root) %{_libdir}/opensips/modules/seas.so
+%attr(755,root,root) %{_libdir}/opensips/modules/signaling.so
 %attr(755,root,root) %{_libdir}/opensips/modules/siptrace.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sl.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sms.so
@@ -360,7 +414,7 @@ fi
 %if %{with radius}
 %files radius
 %defattr(644,root,root,755)
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/dictionary.radius
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/dictionary.opensips
 %attr(755,root,root) %{_libdir}/opensips/modules/auth_radius.so
 %attr(755,root,root) %{_libdir}/opensips/modules/avp_radius.so
 %attr(755,root,root) %{_libdir}/opensips/modules/group_radius.so
@@ -372,6 +426,31 @@ fi
 %files odbc
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/opensips/modules/db_unixodbc.so
+%endif
+
+%if %{with geoip}
+%files mmgeoip
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/mmgeoip.so
+%endif
+
+%if %{with ldap}
+%files ldap
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/h350.so
+%attr(755,root,root) %{_libdir}/opensips/modules/ldap.so
+%endif
+
+%if %{with carrierroute}
+%files carrierroute
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/carrierroute.so
+%endif
+
+%if %{with osp}
+%files osp
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/osp.so
 %endif
 
 %files snmpstats
