@@ -26,7 +26,7 @@ start() {
 	# Start daemons.
 	if [ ! -f /var/lock/subsys/opensips ]; then
 		msg_starting opensips
-		daemon opensips
+		daemon opensips -P /var/run/opensips.pid
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/opensips
 	else
