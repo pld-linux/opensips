@@ -12,12 +12,12 @@
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
-Version:	1.5.2
+Version:	1.5.3
 Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-tls_src.tar.gz
-# Source0-md5:	91ef8939e8a1cdccf4f76489ec40c70e
+# Source0-md5:	8a03167420c31da15405bed7630ed3e2
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 URL:		http://www.opensips.org/
