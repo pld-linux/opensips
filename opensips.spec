@@ -8,12 +8,12 @@
 %bcond_without	ldap		# LDAP support
 %bcond_with	osp		# ETSI OSP VoIP Peering support
 %bcond_without	geoip		# GeoIP
-#
+
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	1.5.3
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-tls_src.tar.gz
@@ -24,10 +24,10 @@ URL:		http://www.opensips.org/
 %{?with_geoip:BuildRequires:	GeoIP-devel}
 %{?with_osp:BuildRequires:	OSPToolkit}
 BuildRequires:	bison
+BuildRequires:	curl-devel
 BuildRequires:	expat-devel
 BuildRequires:	flex
 %{?with_carrierroute:BuildRequires:	libconfuse-devel}
-BuildRequires:	curl-devel
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
 BuildRequires:	libxml2-devel
 %{?with_mysql:BuildRequires:	mysql-devel}
@@ -137,7 +137,7 @@ Group:		Networking/Daemons
 Requires:	%{name} = %{version}-%{release}
 
 %description ldap
-LDAP and H350  modules for openSIPS.
+LDAP and H350 modules for openSIPS.
 
 %description ldap -l pl.UTF-8
 Moduły LDAP i H350 do openSIPS.
@@ -190,16 +190,18 @@ openSIPS SNMP statistics module.
 %description snmpstats -l pl.UTF-8
 Moduł do statystyk SNMP do openSIPS.
 
-%package mibs
+%package -n mibs-%{name}
 Summary:	MIBs for openSIPS
 Summary(pl.UTF-8):	MIB-y dla openSIPS
 Group:		Applications/System
+Requires:	mibs-dirs
 Requires:	net-snmp-mibs
+Obsoletes:	opensips-mibs
 
-%description mibs
+%description -n mibs-%{name}
 MIBs for openSIPS.
 
-%description mibs -l pl.UTF-8
+%description -n mibs-%{name} -l pl.UTF-8
 MIB-y dla openSIPS.
 
 %prep
@@ -254,7 +256,8 @@ exclude_modules="$(cat exclude_modules)"
 	prefix="%{_prefix}" \
 	basedir=$RPM_BUILD_ROOT \
 	cfg-prefix=$RPM_BUILD_ROOT \
-	cfg-target=/etc/opensips/
+	cfg-target=/etc/opensips/ \
+	INSTALLMIBDIR=$RPM_BUILD_ROOT%{_datadir}/mibs
 
 for i in modules/*; do \
 	i=$(basename $i)
@@ -282,7 +285,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 /sbin/chkconfig --add opensips
-%service opensips restart "sip Daemon"
+%service opensips restart "SIP Daemon"
 
 %preun
 if [ "$1" = "0" ]; then
@@ -461,6 +464,6 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/perl.so
 %attr(755,root,root) %{_libdir}/opensips/modules/perlvdb.so
 
-%files mibs
+%files -n mibs-%{name}
 %defattr(644,root,root,755)
-%{_datadir}/snmp/mibs/*
+%{_datadir}/mibs/*
