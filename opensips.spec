@@ -30,14 +30,21 @@ BuildRequires:	flex
 %{?with_carrierroute:BuildRequires:	libconfuse-devel}
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
 BuildRequires:	libxml2-devel
+BuildRequires:	libxslt-progs
+#BuildRequires:	lynx
 %{?with_mysql:BuildRequires:	mysql-devel}
 BuildRequires:	net-snmp-devel
 %{?with_ldap:BuildRequires:	openldap-devel}
 BuildRequires:	openssl-devel
+BuildRequires:	pcre-devel
 BuildRequires:	perl-devel
+BuildRequires:	perl-tools-devel
 %{?with_radius:BuildRequires:	radiusclient-ng-devel}
+BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.268
+#BuildRequires:	subversion
 %{?with_odbc:BuildRequires:	unixODBC-devel}
+BuildRequires:	which
 #BuildRequires:	xmlrpc-c-devel >= 1.10.0
 BuildRequires:	zlib-devel
 Requires(post,preun):	/sbin/chkconfig
