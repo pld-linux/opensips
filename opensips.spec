@@ -13,7 +13,7 @@ Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	1.5.3
-Release:	2
+Release:	3
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-tls_src.tar.gz
@@ -195,7 +195,7 @@ Summary:	MIBs for openSIPS
 Summary(pl.UTF-8):	MIB-y dla openSIPS
 Group:		Applications/System
 Requires:	mibs-dirs
-Requires:	net-snmp-mibs
+Requires:	mibs-net-snmp
 Obsoletes:	opensips-mibs
 
 %description -n mibs-%{name}
