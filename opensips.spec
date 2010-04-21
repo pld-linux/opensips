@@ -13,13 +13,14 @@ Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	1.5.3
-Release:	5
+Release:	6
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-tls_src.tar.gz
 # Source0-md5:	8a03167420c31da15405bed7630ed3e2
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
+Patch0:		%{name}-openssl.patch
 URL:		http://www.opensips.org/
 %{?with_geoip:BuildRequires:	GeoIP-devel}
 %{?with_osp:BuildRequires:	OSPToolkit}
@@ -213,6 +214,7 @@ MIB-y dla openSIPS.
 
 %prep
 %setup -q -n %{name}-%{version}-tls
+%patch0 -p1
 
 find -type d -name CVS | xargs rm -rf
 
