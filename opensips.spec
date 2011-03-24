@@ -8,19 +8,21 @@
 %bcond_without	ldap		# LDAP support
 %bcond_with	osp		# ETSI OSP VoIP Peering support
 %bcond_without	geoip		# GeoIP
+%bcond_without	json		# json support
+%bcond_without	memcached	# memcached support
 
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
-Version:	1.5.3
-Release:	8
+Version:	1.6.4
+%define		_upstreamrel	2
+Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
-Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-tls_src.tar.gz
-# Source0-md5:	8a03167420c31da15405bed7630ed3e2
+Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-%{_upstreamrel}-tls_src.tar.gz
+# Source0-md5:	e9869d9a726d70f83de4a1e77cd24d40
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
-Patch0:		%{name}-openssl.patch
 URL:		http://www.opensips.org/
 %{?with_geoip:BuildRequires:	GeoIP-devel}
 %{?with_osp:BuildRequires:	OSPToolkit}
@@ -28,7 +30,9 @@ BuildRequires:	bison
 BuildRequires:	curl-devel
 BuildRequires:	expat-devel
 BuildRequires:	flex
+%{?with_json:BuildRequires:	json-c-devel}
 %{?with_carrierroute:BuildRequires:	libconfuse-devel}
+%{?with_memcached:BuildRequires:	libmemcached-devel}
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
 BuildRequires:	libxml2-devel
 BuildRequires:	libxslt-progs
@@ -88,6 +92,30 @@ PostgreSQL module for openSIPS.
 
 %description postgres -l pl.UTF-8
 Moduł PostgreSQL do openSIPS.
+
+%package json
+Summary:	openSIPS JSON module
+Summary(pl.UTF-8):	Moduł JSON do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description json
+JSON module for openSIPS.
+
+%description json -l pl.UTF-8
+Moduł JSON do openSIPS.
+
+%package memcached
+Summary:	openSIPS memcached module
+Summary(pl.UTF-8):	Moduł memcached do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description memcached
+Memcached module for openSIPS.
+
+%description memcached -l pl.UTF-8
+Moduł memcached do openSIPS.
 
 %package radius
 Summary:	openSIPS Radius module
@@ -213,8 +241,7 @@ MIBs for openSIPS.
 MIB-y dla openSIPS.
 
 %prep
-%setup -q -n %{name}-%{version}-tls
-%patch0 -p1
+%setup -q -n %{name}-%{version}-%{_upstreamrel}-tls
 
 find -type d -name CVS | xargs rm -rf
 
@@ -242,7 +269,13 @@ exclude_modules="$exclude_modules db_unixodbc"
 exclude_modules="$exclude_modules mmgeoip"
 %endif
 %if %{without radius}
-exclude_modules="$exclude_modules auth_radius avp_radius group_radius uri_radius peering"
+exclude_modules="$exclude_modules aaa_radius"
+%endif
+%if %{without json}
+exclude_modules="$exclude_modules json"
+%endif
+%if %{without memcached}
+exclude_modules="$exclude_modules memcached"
 %endif
 echo "$exclude_modules" > exclude_modules
 %{__make} all \
@@ -322,9 +355,12 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/acc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/alias_db.so
 %attr(755,root,root) %{_libdir}/opensips/modules/auth.so
+%attr(755,root,root) %{_libdir}/opensips/modules/auth_aaa.so
 %attr(755,root,root) %{_libdir}/opensips/modules/auth_db.so
 %attr(755,root,root) %{_libdir}/opensips/modules/auth_diameter.so
 %attr(755,root,root) %{_libdir}/opensips/modules/avpops.so
+%attr(755,root,root) %{_libdir}/opensips/modules/b2b_entities.so
+%attr(755,root,root) %{_libdir}/opensips/modules/b2b_logic.so
 %attr(755,root,root) %{_libdir}/opensips/modules/benchmark.so
 %attr(755,root,root) %{_libdir}/opensips/modules/call_control.so
 %attr(755,root,root) %{_libdir}/opensips/modules/cfgutils.so
@@ -332,7 +368,9 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/cpl-c.so
 %attr(755,root,root) %{_libdir}/opensips/modules/db_berkeley.so
 %attr(755,root,root) %{_libdir}/opensips/modules/db_flatstore.so
+%attr(755,root,root) %{_libdir}/opensips/modules/db_http.so
 %attr(755,root,root) %{_libdir}/opensips/modules/db_text.so
+%attr(755,root,root) %{_libdir}/opensips/modules/db_virtual.so
 %attr(755,root,root) %{_libdir}/opensips/modules/dialog.so
 %attr(755,root,root) %{_libdir}/opensips/modules/dialplan.so
 %attr(755,root,root) %{_libdir}/opensips/modules/dispatcher.so
@@ -360,9 +398,11 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/options.so
 %attr(755,root,root) %{_libdir}/opensips/modules/path.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pdt.so
+%attr(755,root,root) %{_libdir}/opensips/modules/peering.so
 %attr(755,root,root) %{_libdir}/opensips/modules/permissions.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pike.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence.so
+%attr(755,root,root) %{_libdir}/opensips/modules/presence_callinfo.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_dialoginfo.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_mwi.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_xcapdiff.so
@@ -386,17 +426,16 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/speeddial.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sst.so
 %attr(755,root,root) %{_libdir}/opensips/modules/statistics.so
+%attr(755,root,root) %{_libdir}/opensips/modules/stun.so
 %attr(755,root,root) %{_libdir}/opensips/modules/textops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/tlsops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/tm.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uac.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uac_redirect.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uri.so
-%attr(755,root,root) %{_libdir}/opensips/modules/uri_db.so
 %attr(755,root,root) %{_libdir}/opensips/modules/userblacklist.so
 %attr(755,root,root) %{_libdir}/opensips/modules/usrloc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/xcap_client.so
-%attr(755,root,root) %{_libdir}/opensips/modules/xlog.so
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/db_berkeley
 %{_datadir}/%{name}/dbtext
@@ -422,15 +461,23 @@ fi
 %{_datadir}/%{name}/postgres
 %endif
 
+%if %{with json}
+%files json
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/json.so
+%endif
+
+%if %{with memcached}
+%files memcached
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/memcached.so
+%endif
+
 %if %{with radius}
 %files radius
 %defattr(644,root,root,755)
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/dictionary.opensips
-%attr(755,root,root) %{_libdir}/opensips/modules/auth_radius.so
-%attr(755,root,root) %{_libdir}/opensips/modules/avp_radius.so
-%attr(755,root,root) %{_libdir}/opensips/modules/group_radius.so
-%attr(755,root,root) %{_libdir}/opensips/modules/uri_radius.so
-%attr(755,root,root) %{_libdir}/opensips/modules/peering.so
+%attr(755,root,root) %{_libdir}/opensips/modules/aaa_radius.so
 %endif
 
 %if %{with odbc}
