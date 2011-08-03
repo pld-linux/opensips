@@ -23,6 +23,7 @@ Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-%{_u
 # Source0-md5:	e9869d9a726d70f83de4a1e77cd24d40
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
+Patch0:		%{name}-libs.patch
 URL:		http://www.opensips.org/
 %{?with_geoip:BuildRequires:	GeoIP-devel}
 %{?with_osp:BuildRequires:	OSPToolkit}
@@ -242,6 +243,7 @@ MIB-y dla openSIPS.
 
 %prep
 %setup -q -n %{name}-%{version}-%{_upstreamrel}-tls
+%patch0 -p1
 
 find -type d -name CVS | xargs rm -rf
 

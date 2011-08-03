@@ -1,0 +1,11 @@
+--- opensips-1.6.4-2-tls/Makefile.defs~	2011-01-20 14:40:11.000000000 +0100
++++ opensips-1.6.4-2-tls/Makefile.defs	2011-08-03 11:54:45.720770143 +0200
+@@ -1419,7 +1419,7 @@
+ #add libssl if needed
+ ifneq ($(TLS),)
+ DEFS+= -I$(LOCALBASE)/ssl/include -I$(LOCALBASE)/include -I$(SYSBASE)/include/openssl
+-LIBS+= -L$(LOCALBASE)/lib -L$(LOCALBASE)/ssl/lib -lssl  -lcrypto
++LIBS+= -lssl  -lcrypto
+ endif
+ 
+ #add libsctp if needed
