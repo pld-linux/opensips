@@ -16,7 +16,7 @@ Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	1.6.4
 %define		_upstreamrel	2
-Release:	11
+Release:	12
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-%{_upstreamrel}-tls_src.tar.gz
