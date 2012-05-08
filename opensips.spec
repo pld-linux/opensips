@@ -14,13 +14,12 @@
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
-Version:	1.6.4
-%define		_upstreamrel	2
-Release:	12
+Version:	1.7.2
+Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
-Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}-%{_upstreamrel}-tls_src.tar.gz
-# Source0-md5:	e9869d9a726d70f83de4a1e77cd24d40
+Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}_src.tar.gz
+# Source0-md5:	2ff1a5ba832491267fc5f3e1ae21b666
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Patch0:		%{name}-libs.patch
@@ -242,7 +241,7 @@ MIBs for openSIPS.
 MIB-y dla openSIPS.
 
 %prep
-%setup -q -n %{name}-%{version}-%{_upstreamrel}-tls
+%setup -q -n %{name}-%{version}-tls
 %patch0 -p1
 
 find -type d -name CVS | xargs rm -rf
@@ -381,12 +380,12 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/domainpolicy.so
 %attr(755,root,root) %{_libdir}/opensips/modules/drouting.so
 %attr(755,root,root) %{_libdir}/opensips/modules/enum.so
+%attr(755,root,root) %{_libdir}/opensips/modules/event_datagram.so
 %attr(755,root,root) %{_libdir}/opensips/modules/exec.so
 %attr(755,root,root) %{_libdir}/opensips/modules/gflags.so
 %attr(755,root,root) %{_libdir}/opensips/modules/group.so
 %attr(755,root,root) %{_libdir}/opensips/modules/identity.so
 %attr(755,root,root) %{_libdir}/opensips/modules/imc.so
-%attr(755,root,root) %{_libdir}/opensips/modules/lcr.so
 %attr(755,root,root) %{_libdir}/opensips/modules/load_balancer.so
 %attr(755,root,root) %{_libdir}/opensips/modules/localcache.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mangler.so
@@ -414,12 +413,14 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/pua_dialoginfo.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pua_mi.so
 %attr(755,root,root) %{_libdir}/opensips/modules/pua_usrloc.so
+%attr(755,root,root) %{_libdir}/opensips/modules/python.so
 %attr(755,root,root) %{_libdir}/opensips/modules/qos.so
 %attr(755,root,root) %{_libdir}/opensips/modules/ratelimit.so
 %attr(755,root,root) %{_libdir}/opensips/modules/regex.so
 %attr(755,root,root) %{_libdir}/opensips/modules/registrar.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rls.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rr.so
+%attr(755,root,root) %{_libdir}/opensips/modules/rtpproxy.so
 %attr(755,root,root) %{_libdir}/opensips/modules/seas.so
 %attr(755,root,root) %{_libdir}/opensips/modules/signaling.so
 %attr(755,root,root) %{_libdir}/opensips/modules/siptrace.so
@@ -433,7 +434,9 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/tlsops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/tm.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uac.so
+%attr(755,root,root) %{_libdir}/opensips/modules/uac_auth.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uac_redirect.so
+%attr(755,root,root) %{_libdir}/opensips/modules/uac_registrant.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uri.so
 %attr(755,root,root) %{_libdir}/opensips/modules/userblacklist.so
 %attr(755,root,root) %{_libdir}/opensips/modules/usrloc.so
