@@ -311,7 +311,7 @@ exclude_modules="$exclude_modules aaa_radius"
 exclude_modules="$exclude_modules json"
 %endif
 %if %{without memcached}
-exclude_modules="$exclude_modules memcached"
+exclude_modules="$exclude_modules cachedb_memcached"
 %endif
 echo "$exclude_modules" > exclude_modules
 %{__make} all \
