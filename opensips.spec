@@ -329,7 +329,7 @@ rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/{ser,sysconfig,rc.d/init.d}
 
 exclude_modules="$(cat exclude_modules)"
-%{__make} install \
+%{__make} install -j1 \
 	exclude_modules="$exclude_modules" \
 	prefix="%{_prefix}" \
 	basedir=$RPM_BUILD_ROOT \
