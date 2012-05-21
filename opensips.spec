@@ -10,19 +10,21 @@
 %bcond_without	geoip		# GeoIP
 %bcond_without	json		# json support
 %bcond_without	memcached	# memcached support
+%bcond_without	microhttpd	# httpd support
+%bcond_without	redis		# Redis support
 
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
-Version:	1.7.2
+Version:	1.8.0
 Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}_src.tar.gz
-# Source0-md5:	2ff1a5ba832491267fc5f3e1ae21b666
+# Source0-md5:	46b2b9903ce567b1f31e4a7a7518736f
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
-Patch0:		%{name}-libs.patch
+Patch0:		%{name}-curses.patch
 URL:		http://www.opensips.org/
 %{?with_geoip:BuildRequires:	GeoIP-devel}
 %{?with_osp:BuildRequires:	OSPToolkit}
@@ -30,6 +32,7 @@ BuildRequires:	bison
 BuildRequires:	curl-devel
 BuildRequires:	expat-devel
 BuildRequires:	flex
+%{?with_redis:BuildRequires:	hiredis-devel}
 %{?with_json:BuildRequires:	json-c-devel}
 %{?with_carrierroute:BuildRequires:	libconfuse-devel}
 %{?with_memcached:BuildRequires:	libmemcached-devel}
@@ -37,6 +40,7 @@ BuildRequires:	flex
 BuildRequires:	libxml2-devel
 BuildRequires:	libxslt-progs
 #BuildRequires:	lynx
+%{?with_microhttpd:BuildRequires:	libmicrohttpd-devel}
 %{?with_mysql:BuildRequires:	mysql-devel}
 BuildRequires:	net-snmp-devel
 %{?with_ldap:BuildRequires:	openldap-devel}
@@ -58,7 +62,10 @@ Suggests:	python-modules
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # mi_xmlrpc requires xmlrpc-c-devel in version 1.9 only
-%define	exclude_modules	mi_xmlrpc db_oracle
+# event_rabbitmq requires 'amqp.h'
+# cachedb_cassandra requires 'protocol/TBinaryProtocol.h'
+# lua: lua.h
+%define	exclude_modules	mi_xmlrpc db_oracle event_rabbitmq cachedb_cassandra lua
 
 %description
 OpenSIPS (Open SIP Server) is a mature Open Source implementation of a
@@ -240,14 +247,39 @@ MIBs for openSIPS.
 %description -n mibs-%{name} -l pl.UTF-8
 MIB-y dla openSIPS.
 
+%package redis
+Summary:	Redis interface for openSIPS
+Summary(pl.UTF-8):	Moduł Redis do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description redis
+Redis interface for openSIPS.
+
+%description redis -l pl.UTF-8
+Moduł Redis do openSIPS.
+
+%package httpd
+Summary:	HTTP interface to openSIPS
+Summary(pl.UTF-8):	Interfejs HTTP do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description httpd
+HTTP interface to openSIPS.
+
+%description httpd -l pl.UTF-8
+Interfejs HTTP do openSIPS.
+
 %prep
 %setup -q -n %{name}-%{version}-tls
 %patch0 -p1
 
-find -type d -name CVS | xargs rm -rf
-
 %build
 exclude_modules="%{exclude_modules}"
+%if %{without redis}
+exclude_modules="$exclude_modules cachedb_redis"
+%endif
 %if %{without ldap}
 exclude_modules="$exclude_modules h350 ldap"
 %endif
@@ -256,6 +288,9 @@ exclude_modules="$exclude_modules carrierroute"
 %endif
 %if %{without osp}
 exclude_modules="$exclude_modules osp"
+%endif
+%if %{without microhttpd}
+exclude_modules="$exclude_modules httpd"
 %endif
 %if %{without mysql}
 exclude_modules="$exclude_modules db_mysql"
@@ -363,6 +398,7 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/b2b_entities.so
 %attr(755,root,root) %{_libdir}/opensips/modules/b2b_logic.so
 %attr(755,root,root) %{_libdir}/opensips/modules/benchmark.so
+%attr(755,root,root) %{_libdir}/opensips/modules/cachedb_local.so
 %attr(755,root,root) %{_libdir}/opensips/modules/call_control.so
 %attr(755,root,root) %{_libdir}/opensips/modules/cfgutils.so
 %attr(755,root,root) %{_libdir}/opensips/modules/closeddial.so
@@ -376,6 +412,7 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/dialplan.so
 %attr(755,root,root) %{_libdir}/opensips/modules/dispatcher.so
 %attr(755,root,root) %{_libdir}/opensips/modules/diversion.so
+%attr(755,root,root) %{_libdir}/opensips/modules/dns_cache.so
 %attr(755,root,root) %{_libdir}/opensips/modules/domain.so
 %attr(755,root,root) %{_libdir}/opensips/modules/domainpolicy.so
 %attr(755,root,root) %{_libdir}/opensips/modules/drouting.so
@@ -387,7 +424,6 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/identity.so
 %attr(755,root,root) %{_libdir}/opensips/modules/imc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/load_balancer.so
-%attr(755,root,root) %{_libdir}/opensips/modules/localcache.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mangler.so
 %attr(755,root,root) %{_libdir}/opensips/modules/maxfwd.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mediaproxy.so
@@ -423,6 +459,8 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/rtpproxy.so
 %attr(755,root,root) %{_libdir}/opensips/modules/seas.so
 %attr(755,root,root) %{_libdir}/opensips/modules/signaling.so
+%attr(755,root,root) %{_libdir}/opensips/modules/sipcapture.so
+%attr(755,root,root) %{_libdir}/opensips/modules/sipmsgops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/siptrace.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sl.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sms.so
@@ -444,6 +482,7 @@ fi
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/db_berkeley
 %{_datadir}/%{name}/dbtext
+%{_datadir}/%{name}/menuconfig_templates
 %{_mandir}/man*/*
 
 %files xmpp
@@ -475,7 +514,7 @@ fi
 %if %{with memcached}
 %files memcached
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/memcached.so
+%attr(755,root,root) %{_libdir}/opensips/modules/cachedb_memcached.so
 %endif
 
 %if %{with radius}
@@ -528,3 +567,16 @@ fi
 %files -n mibs-%{name}
 %defattr(644,root,root,755)
 %{_datadir}/mibs/*
+
+%if %{with redis}
+%files redis
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/cachedb_redis.so
+%endif
+
+%if %{with microhttpd}
+%files httpd
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/httpd.so
+%attr(755,root,root) %{_libdir}/opensips/modules/mi_http.so
+%endif
