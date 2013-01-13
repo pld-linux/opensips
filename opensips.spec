@@ -17,7 +17,7 @@ Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	1.8.1
-Release:	2
+Release:	3
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}_src.tar.gz
