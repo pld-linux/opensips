@@ -17,7 +17,7 @@ Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	1.8.1
-Release:	4
+Release:	5
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}_src.tar.gz
@@ -342,9 +342,7 @@ for i in modules/*; do \
 	[ -f modules/$i/README ] && cp -f modules/$i/README README.$i; \
 done
 
-%{__rm} -rf _docdir
-install -d _docdir
-install $RPM_BUILD_ROOT%{_docdir}/%{name}/* _docdir/
+# contains the same files we install in %doc
 %{__rm} -r  $RPM_BUILD_ROOT%{_docdir}/%{name}
 
 #cd doc/serdev
@@ -373,7 +371,7 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc README* AUTHORS CREDITS ChangeLog INSTALL NEWS scripts examples _docdir/*
+%doc README* AUTHORS CREDITS ChangeLog INSTALL NEWS scripts examples
 %attr(755,root,root) %{_sbindir}/*
 %dir %{_sysconfdir}/opensips
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensips.cfg
