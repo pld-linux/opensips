@@ -342,10 +342,10 @@ for i in modules/*; do \
 	[ -f modules/$i/README ] && cp -f modules/$i/README README.$i; \
 done
 
-install -d $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-install $RPM_BUILD_ROOT%{_docdir}/%{name}/* \
-	$RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-rm -rf  $RPM_BUILD_ROOT%{_docdir}/%{name}
+%{__rm} -rf _docdir
+install -d _docdir
+install $RPM_BUILD_ROOT%{_docdir}/%{name}/* _docdir/
+%{__rm} -r  $RPM_BUILD_ROOT%{_docdir}/%{name}
 
 #cd doc/serdev
 #docbook2html serdev.sgml
@@ -373,7 +373,7 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc README* AUTHORS CREDITS ChangeLog INSTALL NEWS scripts examples
+%doc README* AUTHORS CREDITS ChangeLog INSTALL NEWS scripts examples _docdir/*
 %attr(755,root,root) %{_sbindir}/*
 %dir %{_sysconfdir}/opensips
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensips.cfg
