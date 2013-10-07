@@ -17,7 +17,7 @@ Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	1.8.1
-Release:	6
+Release:	7
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}_src.tar.gz
@@ -36,11 +36,11 @@ BuildRequires:	flex
 %{?with_json:BuildRequires:	json-c-devel}
 %{?with_carrierroute:BuildRequires:	libconfuse-devel}
 %{?with_memcached:BuildRequires:	libmemcached-devel}
+%{?with_microhttpd:BuildRequires:	libmicrohttpd-devel}
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
 BuildRequires:	libxml2-devel
 BuildRequires:	libxslt-progs
 #BuildRequires:	lynx
-%{?with_microhttpd:BuildRequires:	libmicrohttpd-devel}
 %{?with_mysql:BuildRequires:	mysql-devel}
 BuildRequires:	net-snmp-devel
 %{?with_ldap:BuildRequires:	openldap-devel}
