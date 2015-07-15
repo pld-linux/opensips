@@ -43,6 +43,7 @@ BuildRequires:	flex
 %{?with_microhttpd:BuildRequires:	libmicrohttpd-devel}
 %{?with_mongodb:BuildRequires:	libmongo-client-devel}
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
+BuildRequires:	libsctp-devel
 BuildRequires:	libxml2-devel
 BuildRequires:	libxslt-progs
 #BuildRequires:	lynx
