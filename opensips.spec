@@ -20,13 +20,14 @@ Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	2.1.0
-Release:	0.1
+Release:	0.2
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}.tar.gz
 # Source0-md5:	68375c1b6cb546ad2c036b5a1c5b31b9
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
+Source3:	%{name}.service
 URL:		http://www.opensips.org/
 %{?with_sngtc:BuildRequires:    TODO-SNGTC-BRs}
 %{?with_geoip:BuildRequires:	GeoIP-devel}
@@ -56,7 +57,7 @@ BuildRequires:	perl-devel
 BuildRequires:	perl-tools-devel
 %{?with_radius:BuildRequires:	radiusclient-ng-devel}
 BuildRequires:	rpm-pythonprov
-BuildRequires:	rpmbuild(macros) >= 1.268
+BuildRequires:	rpmbuild(macros) >= 1.671
 #BuildRequires:	subversion
 %{?with_odbc:BuildRequires:	unixODBC-devel}
 BuildRequires:	which
@@ -64,6 +65,7 @@ BuildRequires:	which
 BuildRequires:	zlib-devel
 Requires(post,preun):	/sbin/chkconfig
 Requires:	rc-scripts
+Requires:	systemd-units >= 38
 Suggests:	python-modules
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -340,7 +342,8 @@ echo "$exclude_modules" > exclude_modules
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT%{_sysconfdir}/{ser,sysconfig,rc.d/init.d}
+install -d $RPM_BUILD_ROOT%{_sysconfdir}/{ser,sysconfig,rc.d/init.d} \
+	-d $RPM_BUILD_ROOT%{systemdunitdir}
 
 exclude_modules="$(cat exclude_modules)"
 %{__make} install -j1 \
@@ -369,6 +372,7 @@ done
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/opensips
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/opensips
+install %{SOURCE3} $RPM_BUILD_ROOT%{systemdunitdir}/opensips.service
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -376,12 +380,20 @@ rm -rf $RPM_BUILD_ROOT
 %post
 /sbin/chkconfig --add opensips
 %service opensips restart "SIP Daemon"
+%systemd_post opensips.service
 
 %preun
+%systemd_preun opensips.service
 if [ "$1" = "0" ]; then
 	%service opensips stop
 	/sbin/chkconfig --del opensips
 fi
+
+%postun
+%systemd_reload
+
+%triggerpostun -- %{name} < 2.1.0-0.2
+%systemd_trigger opensips.service
 
 %files
 %defattr(644,root,root,755)
@@ -393,6 +405,7 @@ fi
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/osipsconsolerc
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/opensips
 %attr(754,root,root) /etc/rc.d/init.d/opensips
+%{systemdunitdir}/opensips.service
 %dir %{_libdir}/opensips
 %dir %{_libdir}/opensips/opensipsctl
 %{_libdir}/opensips/opensipsctl/*.*

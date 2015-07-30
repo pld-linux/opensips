@@ -1,0 +1,11 @@
+[Unit]
+Description=SIP proxy, redirect and registrar server
+After=postgresql.service mysql.service freeradius-server.service
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/opensips -P /var/run/opensips.pid
+PIDFile=/var/run/opensips.pid
+
+[Install]
+WantedBy=multi-user.target
