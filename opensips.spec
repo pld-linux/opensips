@@ -339,7 +339,7 @@ echo "$exclude_modules" > exclude_modules
 	CC="%{__cc}" \
 	CC_EXTRA_OPTS="-I/usr/include/ncurses" \
 	PREFIX="%{_prefix}" \
-	CFLAGS="%{rpmcflags} -Wcast-align -fPIC"
+	CFLAGS="%{rpmcflags} -Wcast-align"
 
 %install
 rm -rf $RPM_BUILD_ROOT
