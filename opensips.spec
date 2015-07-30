@@ -69,6 +69,10 @@ Requires:	systemd-units >= 38
 Suggests:	python-modules
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
+# -fPIC, included in default x32 cflags, crashes our GCC (4.9.2) on
+# one of opensips source files
+%define		filterout_c	-fPIC
+
 # mi_xmlrpc requires xmlrpc-c-devel in version 1.9 only
 # event_rabbitmq requires 'amqp.h'
 # cachedb_cassandra requires 'protocol/TBinaryProtocol.h'
