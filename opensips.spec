@@ -20,7 +20,7 @@ Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
 Version:	2.1.0
-Release:	0.2
+Release:	0.3
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}.tar.gz
@@ -331,12 +331,13 @@ exclude_modules="$exclude_modules sngtc"
 %endif
 echo "$exclude_modules" > exclude_modules
 %{__make} all \
+	Q= \
 	exclude_modules="$exclude_modules" \
 	prefix="%{_prefix}" \
 	cfg-prefix=$RPM_BUILD_ROOT \
 	cfg-target=/etc/opensips/ \
 	CC="%{__cc}" \
-    CC_EXTRA_OPTS="-I/usr/include/ncurses"
+	CC_EXTRA_OPTS="-I/usr/include/ncurses" \
 	PREFIX="%{_prefix}" \
 	CFLAGS="%{rpmcflags} -Wcast-align -fPIC"
 
@@ -347,6 +348,7 @@ install -d $RPM_BUILD_ROOT%{_sysconfdir}/{ser,sysconfig,rc.d/init.d} \
 
 exclude_modules="$(cat exclude_modules)"
 %{__make} install -j1 \
+	Q= \
 	exclude_modules="$exclude_modules" \
 	prefix="%{_prefix}" \
 	basedir=$RPM_BUILD_ROOT \
