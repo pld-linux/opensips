@@ -462,7 +462,6 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/mediaproxy.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mi_datagram.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mi_fifo.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mi_http.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mi_json.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mi_xmlrpc_ng.so
 %attr(755,root,root) %{_libdir}/opensips/modules/msilo.so
