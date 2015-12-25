@@ -12,7 +12,7 @@
 %bcond_without	memcached	# memcached support
 %bcond_without	microhttpd	# httpd support
 %bcond_without	redis		# Redis support
-%bcond_without	couchbase	# couchbase support
+%bcond_with	couchbase	# couchbase support
 %bcond_without	mongodb		# mongodb support
 %bcond_with	sngtc		# Sangoma transcoding module support
 
