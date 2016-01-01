@@ -13,12 +13,9 @@
 %bcond_without	microhttpd	# httpd support
 %bcond_without	redis		# Redis support
 %bcond_with	couchbase	# couchbase support
-%bcond_without	mongodb		# mongodb support
+%bcond_with	mongodb		# mongodb support
 %bcond_with	sngtc		# Sangoma transcoding module support
 
-%ifarch x32
-%undefine	with_mongodb
-%endif
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
@@ -637,6 +634,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/opensips/modules/db_perlvdb.so
 %attr(755,root,root) %{_libdir}/opensips/modules/perl.so
+%{_libdir}/opensips/
 
 %files -n mibs-%{name}
 %defattr(644,root,root,755)
