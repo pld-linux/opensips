@@ -634,7 +634,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/opensips/modules/db_perlvdb.so
 %attr(755,root,root) %{_libdir}/opensips/modules/perl.so
-%{_libdir}/opensips/OpenSIPS
+%{_libdir}/opensips/perl
 
 %files -n mibs-%{name}
 %defattr(644,root,root,755)
