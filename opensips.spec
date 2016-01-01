@@ -16,18 +16,23 @@
 %bcond_without	mongodb		# mongodb support
 %bcond_with	sngtc		# Sangoma transcoding module support
 
+%ifarch x32
+%undefine	with_mongodb
+%endif
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
 Name:		opensips
-Version:	2.1.0
-Release:	0.3
+Version:	2.1.1
+Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}.tar.gz
-# Source0-md5:	68375c1b6cb546ad2c036b5a1c5b31b9
+# Source0-md5:	ea7b3d394eb7461e172af4b900f19b70
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Source3:	%{name}.service
+Patch0:		x32.patch
+Patch1:		make.patch
 URL:		http://www.opensips.org/
 %{?with_sngtc:BuildRequires:    TODO-SNGTC-BRs}
 %{?with_geoip:BuildRequires:	GeoIP-devel}
@@ -281,6 +286,8 @@ Interfejs HTTP do openSIPS.
 
 %prep
 %setup -q
+%patch0 -p1
+%patch1 -p1
 
 %build
 exclude_modules="%{exclude_modules}"
@@ -333,12 +340,13 @@ echo "$exclude_modules" > exclude_modules
 %{__make} all \
 	Q= \
 	exclude_modules="$exclude_modules" \
-	prefix="%{_prefix}" \
+	prefix=%{_prefix} \
+	PREFIX=%{_prefix} \
+	LIBDIR=%{_lib} \
 	cfg-prefix=$RPM_BUILD_ROOT \
 	cfg-target=/etc/opensips/ \
 	CC="%{__cc}" \
 	CC_EXTRA_OPTS="-I/usr/include/ncurses" \
-	PREFIX="%{_prefix}" \
 	CFLAGS="%{rpmcflags} -Wcast-align"
 
 %install
@@ -350,8 +358,10 @@ exclude_modules="$(cat exclude_modules)"
 %{__make} install -j1 \
 	Q= \
 	exclude_modules="$exclude_modules" \
-	prefix="%{_prefix}" \
-	basedir=$RPM_BUILD_ROOT \
+	prefix=%{_prefix} \
+	PREFIX=%{_prefix} \
+	LIBDIR=%{_lib} \
+	BASEDIR=$RPM_BUILD_ROOT \
 	cfg-prefix=$RPM_BUILD_ROOT \
 	cfg-target=/etc/opensips/ \
 	INSTALLMIBDIR=$RPM_BUILD_ROOT%{_datadir}/mibs
@@ -405,6 +415,24 @@ fi
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensips.cfg
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensipsctlrc
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/osipsconsolerc
+%dir %attr(700,root,root) %{_sysconfdir}/opensips/tls
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/README
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/ca.conf
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/request.conf
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/user.conf
+%dir %attr(700,root,root) %{_sysconfdir}/opensips/tls/rootCA
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/rootCA/cacert.pem
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/rootCA/index.txt
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/rootCA/serial
+%dir %attr(700,root,root) %{_sysconfdir}/opensips/tls/rootCA/certs
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/rootCA/certs/01.pem
+%dir %attr(700,root,root) %{_sysconfdir}/opensips/tls/rootCA/private
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/rootCA/private/cakey.pem
+%dir %attr(700,root,root) %{_sysconfdir}/opensips/tls/user
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/user/user-calist.pem
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/user/user-cert.pem
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/user/user-cert_req.pem
+%attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/user/user-privkey.pem
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/opensips
 %attr(754,root,root) /etc/rc.d/init.d/opensips
 %{systemdunitdir}/opensips.service
@@ -528,6 +556,7 @@ fi
 %{_datadir}/%{name}/db_berkeley
 %{_datadir}/%{name}/dbtext
 %{_datadir}/%{name}/menuconfig_templates
+%{_datadir}/%{name}/pi_http
 %{_mandir}/man*/*
 
 %files xmpp

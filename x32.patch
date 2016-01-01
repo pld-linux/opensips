@@ -1,0 +1,50 @@
+--- opensips-2.1.0/atomic.h.orig	2015-04-22 10:20:03.000000000 +0200
++++ opensips-2.1.0/atomic.h	2015-12-31 15:23:47.575835666 +0100
+@@ -142,7 +142,11 @@
+ static __inline__ void atomic_add(unsigned long i, atomic_t *v)
+ {
+ 	__asm__ __volatile__(
++#if defined(__ILP32__)
++		LOCK "add %1,%0"
++#else
+ 		LOCK "addq %1,%0"
++#endif
+ 		:"=m" (v->counter)
+ 		:"er" (i), "m" (v->counter));
+ }
+@@ -157,7 +161,11 @@
+ static __inline__ void atomic_sub(unsigned long i, atomic_t *v)
+ {
+ 	__asm__ __volatile__(
++#if defined(__ILP32__)
++		LOCK "sub %1,%0"
++#else
+ 		LOCK "subq %1,%0"
++#endif
+ 		:"=m" (v->counter)
+ 		:"er" (i), "m" (v->counter));
+ }
+@@ -171,7 +179,11 @@
+ static __inline__ void atomic_inc(atomic_t *v)
+ {
+ 	__asm__ __volatile__(
++#if defined(__ILP32__)
++		LOCK "inc %0"
++#else
+ 		LOCK "incq %0"
++#endif
+ 		:"=m" (v->counter)
+ 		:"m" (v->counter));
+ }
+@@ -185,7 +197,11 @@
+ static __inline__ void atomic_dec(atomic_t *v)
+ {
+ 	__asm__ __volatile__(
++#if defined(__ILP32__)
++		LOCK "dec %0"
++#else
+ 		LOCK "decq %0"
++#endif
+ 		:"=m" (v->counter)
+ 		:"m" (v->counter));
+ }

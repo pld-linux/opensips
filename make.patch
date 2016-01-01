@@ -1,0 +1,161 @@
+diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
+--- opensips-2.1.1/Makefile	2015-08-27 17:06:47.000000000 +0200
++++ opensips-2.1.1.make/Makefile	2016-01-01 14:30:11.252303815 +0100
+@@ -55,7 +55,6 @@
+ tls_overwrite_certs?=
+ 
+ 
+-makefile_defs=0
+ DEFS:=
+ DEBUG_PARSER?=
+ 
+@@ -476,7 +475,7 @@
+ # Install everything (except modules-docbook?)
+ install: install-app install-console install-modules-all
+ 
+-opensipsmc: $(cfg-prefix)/$(cfg-dir) $(data-prefix)/$(data-dir)
++opensipsmc: $(cfg-dir) $(data-dir)
+ 	$(MAKE) -C menuconfig proper
+ 	$(MAKE) -C menuconfig \
+ 		MENUCONFIG_CFG_PATH=$(data-target)/menuconfig_templates/ \
+@@ -493,14 +492,14 @@
+ 	$(MAKE) -C db/schema
+ 	-@echo "Done"
+ 
+-mk-install-dirs: $(cfg-prefix)/$(cfg-dir) $(bin-prefix)/$(bin-dir) \
+-			$(modules-prefix)/$(modules-dir) $(doc-prefix)/$(doc-dir) \
+-			$(man-prefix)/$(man-dir)/man8 $(man-prefix)/$(man-dir)/man5 \
+-			$(data-prefix)/$(data-dir)
++mk-install-dirs: $(cfg-dir) $(bin-dir) \
++			$(modules-dir) $(doc-dir) \
++			$(man-dir)/man8 $(man-dir)/man5 \
++			$(data-dir)
+ 
+ 		
+ # note: on solaris 8 sed: ? or \(...\)* (a.s.o) do not work
+-install-cfg: $(cfg-prefix)/$(cfg-dir)
++install-cfg: $(cfg-dir)
+ 		sed -e "s#/usr/.*lib/$(NAME)/modules/#$(modules-target)#g" \
+ 			< etc/$(NAME).cfg > $(cfg-prefix)/$(cfg-dir)$(NAME).cfg.sample0
+ 		sed -e "s#/usr/.*etc/$(NAME)/tls/#$(cfg-target)tls/#g" \
+@@ -531,7 +530,7 @@
+ 				$(cfg-prefix)/$(cfg-dir)/osipsconsolerc; \
+ 		fi
+ 
+-install-console: $(bin-prefix)/$(bin-dir)
++install-console: $(bin-dir)
+ 		# install osipsconsole
+ 		cat scripts/osipsconsole | \
+ 		sed -e "s#PATH_BIN[ \t]*=[ \t]*\"\./\"#PATH_BIN = \"$(bin-target)\"#g" | \
+@@ -544,7 +543,7 @@
+ 		$(INSTALL_BIN) /tmp/osipsconsole $(bin-prefix)/$(bin-dir)
+ 		rm -fr /tmp/osipsconsole
+ 
+-install-bin: $(bin-prefix)/$(bin-dir) utils
++install-bin: $(bin-dir) utils
+ 		# install opensips binary
+ 		$(INSTALL_TOUCH) $(bin-prefix)/$(bin-dir)/$(NAME) 
+ 		$(INSTALL_BIN) $(NAME) $(bin-prefix)/$(bin-dir)
+@@ -615,7 +614,8 @@
+ 			cd utils/db_oracle; $(MAKE) all ; \
+ 		fi ;
+ 
+-install-modules: modules $(modules-prefix)/$(modules-dir)
++install-modules: modules $(modules-dir)
++	echo $(modules_full_path)
+ 	@for r in $(modules_full_path) "" ; do \
+ 		if [ -n "$$r" ]; then \
+ 			if [ -f "$$r" ]; then \
+@@ -633,14 +633,14 @@
+ .PHONY: install-doc install-app-doc install-modules-doc
+ install-doc: install-app-doc install-modules-doc
+ 
+-install-app-doc: $(doc-prefix)/$(doc-dir)
++install-app-doc: $(doc-dir)
+ 	-@for d in $(install_docs) ""; do \
+ 		$(INSTALL_TOUCH) $(doc-prefix)/$(doc-dir)/"$$d" ; \
+ 		$(INSTALL_DOC) "$$d" $(doc-prefix)/$(doc-dir) ; \
+ 	done
+ 
+ 
+-install-modules-doc: $(doc-prefix)/$(doc-dir)
++install-modules-doc: $(doc-dir)
+ 	-@for r in $(modules_basenames) "" ; do \
+ 		if [ -n "$$r" ]; then \
+ 			if [ -f modules/"$$r"/README ]; then \
+@@ -652,7 +652,7 @@
+ 	done 
+ 
+ 
+-install-man: $(man-prefix)/$(man-dir)/man8 $(man-prefix)/$(man-dir)/man5
++install-man: $(man-dir)/man8 $(man-dir)/man5
+ 		sed -e "s#/etc/$(NAME)/$(NAME)\.cfg#$(cfg-target)$(NAME).cfg#g" \
+ 			-e "s#/usr/sbin/#$(bin-target)#g" \
+ 			-e "s#/usr/lib/$(NAME)/modules/#$(modules-target)#g" \
+@@ -679,7 +679,7 @@
+ 			$(man-prefix)/$(man-dir)/man8/opensipsunix.8
+ 		chmod 644  $(man-prefix)/$(man-dir)/man8/opensipsunix.8
+ 
+-install-modules-docbook: $(doc-prefix)/$(doc-dir)
++install-modules-docbook: $(doc-dir)
+ 	-@for r in $(modules_basenames) "" ; do \
+ 		if [ -n "$$r" ]; then \
+ 			if [ -d modules/"$$r"/doc ]; then \
+diff -ur opensips-2.1.1/Makefile.defs opensips-2.1.1.make/Makefile.defs
+--- opensips-2.1.1/Makefile.defs	2015-08-27 17:06:47.000000000 +0200
++++ opensips-2.1.1.make/Makefile.defs	2016-01-01 14:29:50.262273910 +0100
+@@ -51,11 +51,6 @@
+ 
+ # check if already included/exported
+ 
+-ifeq ($(makefile_defs), 1)
+-else
+-makefile_defs=1
+-export makefile_defs
+-
+ # main binary name
+ MAIN_NAME=opensips
+ 
+@@ -1515,6 +1510,3 @@
+ 		DEFS+= -DUSE_SYSV_SEM  # try sys v sems
+ 		found_lock_method=yes
+ endif
+-
+-
+-endif  # ifeq ($(makefile_defs, 1)
+diff -ur opensips-2.1.1/Makefile.rules opensips-2.1.1.make/Makefile.rules
+--- opensips-2.1.1/Makefile.rules	2015-08-27 17:06:47.000000000 +0200
++++ opensips-2.1.1.make/Makefile.rules	2016-01-01 14:03:59.144326624 +0100
+@@ -61,25 +61,25 @@
+ 		cp $< $@; \
+ 	fi
+ 
+-$(cfg-prefix)/$(cfg-dir): 
++$(cfg-dir): 
+ 		mkdir -p $(cfg-prefix)/$(cfg-dir)
+ 
+-$(bin-prefix)/$(bin-dir):
++$(bin-dir):
+ 		mkdir -p $(bin-prefix)/$(bin-dir)
+ 
+-$(modules-prefix)/$(modules-dir):
++$(modules-dir):
+ 		mkdir -p $(modules-prefix)/$(modules-dir)
+ 
+-$(doc-prefix)/$(doc-dir):
++$(doc-dir):
+ 		mkdir -p $(doc-prefix)/$(doc-dir)
+ 
+-$(man-prefix)/$(man-dir)/man8:
++$(man-dir)/man8:
+ 		mkdir -p $(man-prefix)/$(man-dir)/man8
+ 
+-$(man-prefix)/$(man-dir)/man5:
++$(man-dir)/man5:
+ 		mkdir -p $(man-prefix)/$(man-dir)/man5
+ 
+-$(data-prefix)/$(data-dir):
++$(data-dir):
+ 		mkdir -p $(data-prefix)/$(data-dir)
+ 
+ 
