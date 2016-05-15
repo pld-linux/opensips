@@ -17,14 +17,14 @@
 %bcond_with	sngtc		# Sangoma transcoding module support
 
 Summary:	SIP proxy, redirect and registrar server
-Summary(pl.UTF-8):	Serwer SIP rejestrujący, przekierowujący i robiący proxy
+Summary(pl.UTF-8):	Serwer SIP przekazujący (proxy), przekierowujący i rejestrujący
 Name:		opensips
-Version:	2.1.1
+Version:	2.1.2
 Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
-Source0:	http://opensips.org/pub/opensips/%{version}/src/%{name}-%{version}.tar.gz
-# Source0-md5:	ea7b3d394eb7461e172af4b900f19b70
+Source0:	http://opensips.org/pub/opensips/%{version}/%{name}-%{version}.tar.gz
+# Source0-md5:	f7590fde5d99fffe05659442073d750c
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Source3:	%{name}.service
@@ -85,6 +85,15 @@ core component of any SIP-based VoIP solution. With a very flexible
 and customizable routing engine, OpenSIPS 'unifies voice, video, IM
 and presence services in a highly efficient way, thanks to its
 scalable (modular) design.
+
+%description -l pl.UTF-8
+OpenSIPS (Open SIP Server) to dojrzała, mająca otwarte źródła
+implementacja serwera SIP. OpenSIPS to więcej niż proxy/router SIP,
+jako że zawiera funkcje na poziomie aplikacji. OpenSIPS, jako serwer
+SIP, jest głównym składnikiem dowolnego rozwiązania VoIP opartego na
+SIP. Z bardzo elastycznym i konfigurowalnym silnikiem trasującym,
+łączy usługi głosowe, wideo, komunikatorów oraz obecności w bardzo
+wydajny sposób, dzięki skalowalnej, modularnej budowie.
 
 %package mysql
 Summary:	openSIPS MySQL module
@@ -334,6 +343,7 @@ exclude_modules="$exclude_modules cachedb_mongodb"
 exclude_modules="$exclude_modules sngtc"
 %endif
 echo "$exclude_modules" > exclude_modules
+LDFLAGS="%{rpmldflags}" \
 %{__make} all \
 	Q= \
 	exclude_modules="$exclude_modules" \
