@@ -13,8 +13,8 @@ diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
  # Install everything (except modules-docbook?)
  install: install-app install-console install-modules-all
  
--opensipsmc: $(cfg-prefix)/$(cfg-dir) $(data-prefix)/$(data-dir)
-+opensipsmc: $(cfg-dir) $(data-dir)
+-opensipsmc: $(cfg_prefix)/$(cfg_dir) $(data_prefix)/$(data_dir)
++opensipsmc: $(cfg_dir) $(data_dir)
  	$(MAKE) -C menuconfig proper
  	$(MAKE) -C menuconfig \
  		MENUCONFIG_CFG_PATH=$(data-target)/menuconfig_templates/ \
@@ -22,46 +22,46 @@ diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
  	$(MAKE) -C db/schema
  	-@echo "Done"
  
--mk-install-dirs: $(cfg-prefix)/$(cfg-dir) $(bin-prefix)/$(bin-dir) \
--			$(modules-prefix)/$(modules-dir) $(doc-prefix)/$(doc-dir) \
--			$(man-prefix)/$(man-dir)/man8 $(man-prefix)/$(man-dir)/man5 \
--			$(data-prefix)/$(data-dir)
-+mk-install-dirs: $(cfg-dir) $(bin-dir) \
-+			$(modules-dir) $(doc-dir) \
-+			$(man-dir)/man8 $(man-dir)/man5 \
-+			$(data-dir)
+-mk-install_dirs: $(cfg_prefix)/$(cfg_dir) $(bin_prefix)/$(bin_dir) \
+-			$(modules_prefix)/$(modules_dir) $(doc_prefix)/$(doc_dir) \
+-			$(man_prefix)/$(man_dir)/man8 $(man_prefix)/$(man_dir)/man5 \
+-			$(data_prefix)/$(data_dir)
++mk-install_dirs: $(cfg_dir) $(bin_dir) \
++			$(modules_dir) $(doc_dir) \
++			$(man_dir)/man8 $(man_dir)/man5 \
++			$(data_dir)
  
  		
  # note: on solaris 8 sed: ? or \(...\)* (a.s.o) do not work
--install-cfg: $(cfg-prefix)/$(cfg-dir)
-+install-cfg: $(cfg-dir)
+-install-cfg: $(cfg_prefix)/$(cfg_dir)
++install-cfg: $(cfg_dir)
  		sed -e "s#/usr/.*lib/$(NAME)/modules/#$(modules-target)#g" \
- 			< etc/$(NAME).cfg > $(cfg-prefix)/$(cfg-dir)$(NAME).cfg.sample0
+ 			< etc/$(NAME).cfg > $(cfg_prefix)/$(cfg_dir)$(NAME).cfg.sample0
  		sed -e "s#/usr/.*etc/$(NAME)/tls/#$(cfg-target)tls/#g" \
 @@ -531,7 +530,7 @@
- 				$(cfg-prefix)/$(cfg-dir)/osipsconsolerc; \
+ 				$(cfg_prefix)/$(cfg_dir)/osipsconsolerc; \
  		fi
  
--install-console: $(bin-prefix)/$(bin-dir)
-+install-console: $(bin-dir)
+-install-console: $(bin_prefix)/$(bin_dir)
++install-console: $(bin_dir)
  		# install osipsconsole
  		cat scripts/osipsconsole | \
  		sed -e "s#PATH_BIN[ \t]*=[ \t]*\"\./\"#PATH_BIN = \"$(bin-target)\"#g" | \
 @@ -544,7 +543,7 @@
- 		$(INSTALL_BIN) /tmp/osipsconsole $(bin-prefix)/$(bin-dir)
+ 		$(INSTALL_BIN) /tmp/osipsconsole $(bin_prefix)/$(bin_dir)
  		rm -fr /tmp/osipsconsole
  
--install-bin: $(bin-prefix)/$(bin-dir) utils
-+install-bin: $(bin-dir) utils
+-install-bin: $(bin_prefix)/$(bin_dir) utils
++install-bin: $(bin_dir) utils
  		# install opensips binary
- 		$(INSTALL_TOUCH) $(bin-prefix)/$(bin-dir)/$(NAME) 
- 		$(INSTALL_BIN) $(NAME) $(bin-prefix)/$(bin-dir)
+ 		$(INSTALL_TOUCH) $(bin_prefix)/$(bin_dir)/$(NAME) 
+ 		$(INSTALL_BIN) $(NAME) $(bin_prefix)/$(bin_dir)
 @@ -615,7 +614,8 @@
  			cd utils/db_oracle; $(MAKE) all ; \
  		fi ;
  
--install-modules: modules $(modules-prefix)/$(modules-dir)
-+install-modules: modules $(modules-dir)
+-install-modules: modules $(modules_prefix)/$(modules_dir)
++install-modules: modules $(modules_dir)
 +	echo $(modules_full_path)
  	@for r in $(modules_full_path) "" ; do \
  		if [ -n "$$r" ]; then \
@@ -70,16 +70,16 @@ diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
  .PHONY: install-doc install-app-doc install-modules-doc
  install-doc: install-app-doc install-modules-doc
  
--install-app-doc: $(doc-prefix)/$(doc-dir)
-+install-app-doc: $(doc-dir)
+-install-app-doc: $(doc_prefix)/$(doc_dir)
++install-app-doc: $(doc_dir)
  	-@for d in $(install_docs) ""; do \
- 		$(INSTALL_TOUCH) $(doc-prefix)/$(doc-dir)/"$$d" ; \
- 		$(INSTALL_DOC) "$$d" $(doc-prefix)/$(doc-dir) ; \
+ 		$(INSTALL_TOUCH) $(doc_prefix)/$(doc_dir)/"$$d" ; \
+ 		$(INSTALL_DOC) "$$d" $(doc_prefix)/$(doc_dir) ; \
  	done
  
  
--install-modules-doc: $(doc-prefix)/$(doc-dir)
-+install-modules-doc: $(doc-dir)
+-install-modules-doc: $(doc_prefix)/$(doc_dir)
++install-modules-doc: $(doc_dir)
  	-@for r in $(modules_basenames) "" ; do \
  		if [ -n "$$r" ]; then \
  			if [ -f modules/"$$r"/README ]; then \
@@ -87,17 +87,17 @@ diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
  	done 
  
  
--install-man: $(man-prefix)/$(man-dir)/man8 $(man-prefix)/$(man-dir)/man5
-+install-man: $(man-dir)/man8 $(man-dir)/man5
+-install-man: $(man_prefix)/$(man_dir)/man8 $(man_prefix)/$(man_dir)/man5
++install-man: $(man_dir)/man8 $(man_dir)/man5
  		sed -e "s#/etc/$(NAME)/$(NAME)\.cfg#$(cfg-target)$(NAME).cfg#g" \
  			-e "s#/usr/sbin/#$(bin-target)#g" \
  			-e "s#/usr/lib/$(NAME)/modules/#$(modules-target)#g" \
 @@ -679,7 +679,7 @@
- 			$(man-prefix)/$(man-dir)/man8/opensipsunix.8
- 		chmod 644  $(man-prefix)/$(man-dir)/man8/opensipsunix.8
+ 			$(man_prefix)/$(man_dir)/man8/opensipsunix.8
+ 		chmod 644  $(man_prefix)/$(man_dir)/man8/opensipsunix.8
  
--install-modules-docbook: $(doc-prefix)/$(doc-dir)
-+install-modules-docbook: $(doc-dir)
+-install-modules-docbook: $(doc_prefix)/$(doc_dir)
++install-modules-docbook: $(doc_dir)
  	-@for r in $(modules_basenames) "" ; do \
  		if [ -n "$$r" ]; then \
  			if [ -d modules/"$$r"/doc ]; then \
@@ -130,32 +130,32 @@ diff -ur opensips-2.1.1/Makefile.rules opensips-2.1.1.make/Makefile.rules
  		cp $< $@; \
  	fi
  
--$(cfg-prefix)/$(cfg-dir): 
-+$(cfg-dir): 
- 		mkdir -p $(cfg-prefix)/$(cfg-dir)
+-$(cfg_prefix)/$(cfg_dir): 
++$(cfg_dir): 
+ 		mkdir -p $(cfg_prefix)/$(cfg_dir)
  
--$(bin-prefix)/$(bin-dir):
-+$(bin-dir):
- 		mkdir -p $(bin-prefix)/$(bin-dir)
+-$(bin_prefix)/$(bin_dir):
++$(bin_dir):
+ 		mkdir -p $(bin_prefix)/$(bin_dir)
  
--$(modules-prefix)/$(modules-dir):
-+$(modules-dir):
- 		mkdir -p $(modules-prefix)/$(modules-dir)
+-$(modules_prefix)/$(modules_dir):
++$(modules_dir):
+ 		mkdir -p $(modules_prefix)/$(modules_dir)
  
--$(doc-prefix)/$(doc-dir):
-+$(doc-dir):
- 		mkdir -p $(doc-prefix)/$(doc-dir)
+-$(doc_prefix)/$(doc_dir):
++$(doc_dir):
+ 		mkdir -p $(doc_prefix)/$(doc_dir)
  
--$(man-prefix)/$(man-dir)/man8:
-+$(man-dir)/man8:
- 		mkdir -p $(man-prefix)/$(man-dir)/man8
+-$(man_prefix)/$(man_dir)/man8:
++$(man_dir)/man8:
+ 		mkdir -p $(man_prefix)/$(man_dir)/man8
  
--$(man-prefix)/$(man-dir)/man5:
-+$(man-dir)/man5:
- 		mkdir -p $(man-prefix)/$(man-dir)/man5
+-$(man_prefix)/$(man_dir)/man5:
++$(man_dir)/man5:
+ 		mkdir -p $(man_prefix)/$(man_dir)/man5
  
--$(data-prefix)/$(data-dir):
-+$(data-dir):
- 		mkdir -p $(data-prefix)/$(data-dir)
+-$(data_prefix)/$(data_dir):
++$(data_dir):
+ 		mkdir -p $(data_prefix)/$(data_dir)
  
  
