@@ -70,6 +70,10 @@ BuildRequires:	rpmbuild(macros) >= 1.671
 BuildRequires:	which
 #BuildRequires:	xmlrpc-c-devel >= 1.10.0
 BuildRequires:	zlib-devel
+%if %{with radius}
+BuildConflicts:	freeradius-client-devel
+BuildConflicts:	radcli-devel
+%endif
 Requires(post,preun):	/sbin/chkconfig
 Requires:	rc-scripts
 Requires:	systemd-units >= 38
