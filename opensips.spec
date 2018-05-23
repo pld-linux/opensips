@@ -70,10 +70,6 @@ BuildRequires:	rpmbuild(macros) >= 1.671
 BuildRequires:	which
 #BuildRequires:	xmlrpc-c-devel >= 1.10.0
 BuildRequires:	zlib-devel
-%if %{with radius}
-BuildConflicts:	freeradius-client-devel
-BuildConflicts:	radcli-devel
-%endif
 Requires(post,preun):	/sbin/chkconfig
 Requires:	rc-scripts
 Requires:	systemd-units >= 38
@@ -402,7 +398,8 @@ LDFLAGS="%{rpmldflags}" \
 	PREFIX=%{_prefix} \
 	LIBDIR=%{_lib} \
 	cfg_prefix=$RPM_BUILD_ROOT \
-cfg_target=%{_sysconfdir}/opensips/ \
+	cfg_target=%{_sysconfdir}/opensips/ \
+	RADIUSCLIENT=RADIUSCLIENT \
 	CC="%{__cc}" \
 	CC_EXTRA_OPTS="-I/usr/include/ncurses" \
 	CFLAGS="%{rpmcflags} -Wcast-align"
