@@ -1,15 +1,15 @@
-diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
---- opensips-2.1.1/Makefile	2015-08-27 17:06:47.000000000 +0200
-+++ opensips-2.1.1.make/Makefile	2016-01-01 14:30:11.252303815 +0100
-@@ -55,7 +55,6 @@
- tls_overwrite_certs?=
- 
+diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensips-2.4.0/Makefile
+--- opensips-2.4.0.orig/Makefile	2018-04-30 21:37:06.000000000 +0900
++++ opensips-2.4.0/Makefile	2018-05-23 19:45:30.853360012 +0900
+@@ -49,7 +49,6 @@
+ # default debian version when running 'make deb'
+ DEBIAN_VERSION ?= jessie #TODO: can we determine this?
  
 -makefile_defs=0
- DEFS:=
+ DEFS:= $(DEFS_EXTRA_OPTS)
  DEBUG_PARSER?=
  
-@@ -476,7 +475,7 @@
+@@ -467,7 +466,7 @@
  # Install everything (except modules-docbook?)
  install: install-app install-console install-modules-all
  
@@ -17,28 +17,28 @@ diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
 +opensipsmc: $(cfg_dir) $(data_dir)
  	$(MAKE) -C menuconfig proper
  	$(MAKE) -C menuconfig \
- 		MENUCONFIG_CFG_PATH=$(data-target)/menuconfig_templates/ \
-@@ -493,14 +492,14 @@
+ 		MENUCONFIG_CFG_PATH=$(data_target)/menuconfig_templates/ \
+@@ -484,14 +483,14 @@
  	$(MAKE) -C db/schema
  	-@echo "Done"
  
--mk-install_dirs: $(cfg_prefix)/$(cfg_dir) $(bin_prefix)/$(bin_dir) \
+-mk-install-dirs: $(cfg_prefix)/$(cfg_dir) $(bin_prefix)/$(bin_dir) \
 -			$(modules_prefix)/$(modules_dir) $(doc_prefix)/$(doc_dir) \
 -			$(man_prefix)/$(man_dir)/man8 $(man_prefix)/$(man_dir)/man5 \
 -			$(data_prefix)/$(data_dir)
-+mk-install_dirs: $(cfg_dir) $(bin_dir) \
++mk-install-dirs: $(cfg_dir) $(bin_dir) \
 +			$(modules_dir) $(doc_dir) \
 +			$(man_dir)/man8 $(man_dir)/man5 \
 +			$(data_dir)
  
- 		
+ 
  # note: on solaris 8 sed: ? or \(...\)* (a.s.o) do not work
 -install-cfg: $(cfg_prefix)/$(cfg_dir)
 +install-cfg: $(cfg_dir)
- 		sed -e "s#/usr/.*lib/$(NAME)/modules/#$(modules-target)#g" \
+ 		sed -e "s#/usr/.*lib/$(NAME)/modules/#$(modules_target)#g" \
  			< etc/$(NAME).cfg > $(cfg_prefix)/$(cfg_dir)$(NAME).cfg.sample0
- 		sed -e "s#/usr/.*etc/$(NAME)/tls/#$(cfg-target)tls/#g" \
-@@ -531,7 +530,7 @@
+ 		umask 0077; sed -e "s#/usr/.*etc/$(NAME)/tls/#$(cfg_target)tls/#g" \
+@@ -500,7 +500,7 @@
  				$(cfg_prefix)/$(cfg_dir)/osipsconsolerc; \
  		fi
  
@@ -47,34 +47,34 @@ diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
  		# install osipsconsole
  		cat scripts/osipsconsole | \
  		sed -e "s#PATH_BIN[ \t]*=[ \t]*\"\./\"#PATH_BIN = \"$(bin-target)\"#g" | \
-@@ -544,7 +543,7 @@
+@@ -529,7 +528,7 @@
  		$(INSTALL_BIN) /tmp/osipsconsole $(bin_prefix)/$(bin_dir)
  		rm -fr /tmp/osipsconsole
  
--install-bin: $(bin_prefix)/$(bin_dir) utils
-+install-bin: $(bin_dir) utils
+-install-bin: $(bin_prefix)/$(bin_dir) opensipsmc utils
++install-bin: $(bin_dir) opensipsmc utils
  		# install opensips binary
- 		$(INSTALL_TOUCH) $(bin_prefix)/$(bin_dir)/$(NAME) 
+ 		$(INSTALL_TOUCH) $(bin_prefix)/$(bin_dir)/$(NAME)
  		$(INSTALL_BIN) $(NAME) $(bin_prefix)/$(bin_dir)
-@@ -615,7 +614,8 @@
+@@ -604,7 +603,7 @@
  			cd utils/db_oracle; $(MAKE) all ; \
  		fi ;
  
 -install-modules: modules $(modules_prefix)/$(modules_dir)
 +install-modules: modules $(modules_dir)
-+	echo $(modules_full_path)
  	@for r in $(modules_full_path) "" ; do \
  		if [ -n "$$r" ]; then \
  			if [ -f "$$r" ]; then \
-@@ -633,14 +633,14 @@
+@@ -622,7 +621,7 @@
  .PHONY: install-doc install-app-doc install-modules-doc
  install-doc: install-app-doc install-modules-doc
  
 -install-app-doc: $(doc_prefix)/$(doc_dir)
 +install-app-doc: $(doc_dir)
  	-@for d in $(install_docs) ""; do \
- 		$(INSTALL_TOUCH) $(doc_prefix)/$(doc_dir)/"$$d" ; \
- 		$(INSTALL_DOC) "$$d" $(doc_prefix)/$(doc_dir) ; \
+ 		if [ -n "$$d" ]; then \
+ 			$(INSTALL_TOUCH) $(doc_prefix)/$(doc_dir)/"$$d" ; \
+@@ -632,7 +631,7 @@
  	done
  
  
@@ -83,16 +83,16 @@ diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
  	-@for r in $(modules_basenames) "" ; do \
  		if [ -n "$$r" ]; then \
  			if [ -f modules/"$$r"/README ]; then \
-@@ -652,7 +652,7 @@
- 	done 
+@@ -642,7 +641,7 @@
+ 	done
  
  
 -install-man: $(man_prefix)/$(man_dir)/man8 $(man_prefix)/$(man_dir)/man5
 +install-man: $(man_dir)/man8 $(man_dir)/man5
- 		sed -e "s#/etc/$(NAME)/$(NAME)\.cfg#$(cfg-target)$(NAME).cfg#g" \
+ 		sed -e "s#/etc/$(NAME)/$(NAME)\.cfg#$(cfg_target)$(NAME).cfg#g" \
  			-e "s#/usr/sbin/#$(bin-target)#g" \
- 			-e "s#/usr/lib/$(NAME)/modules/#$(modules-target)#g" \
-@@ -679,7 +679,7 @@
+ 			-e "s#/usr/lib/$(NAME)/modules/#$(modules_target)#g" \
+@@ -652,7 +651,7 @@
  			$(man_prefix)/$(man_dir)/man8/opensipsunix.8
  		chmod 644  $(man_prefix)/$(man_dir)/man8/opensipsunix.8
  
@@ -101,10 +101,10 @@ diff -ur opensips-2.1.1/Makefile opensips-2.1.1.make/Makefile
  	-@for r in $(modules_basenames) "" ; do \
  		if [ -n "$$r" ]; then \
  			if [ -d modules/"$$r"/doc ]; then \
-diff -ur opensips-2.1.1/Makefile.defs opensips-2.1.1.make/Makefile.defs
---- opensips-2.1.1/Makefile.defs	2015-08-27 17:06:47.000000000 +0200
-+++ opensips-2.1.1.make/Makefile.defs	2016-01-01 14:29:50.262273910 +0100
-@@ -51,11 +51,6 @@
+diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile.defs opensips-2.4.0/Makefile.defs
+--- opensips-2.4.0.orig/Makefile.defs	2018-04-30 21:37:06.000000000 +0900
++++ opensips-2.4.0/Makefile.defs	2018-05-23 19:46:05.110927079 +0900
+@@ -52,11 +52,6 @@
  
  # check if already included/exported
  
@@ -116,23 +116,22 @@ diff -ur opensips-2.1.1/Makefile.defs opensips-2.1.1.make/Makefile.defs
  # main binary name
  MAIN_NAME=opensips
  
-@@ -1515,6 +1510,3 @@
- 		DEFS+= -DUSE_SYSV_SEM  # try sys v sems
- 		found_lock_method=yes
+@@ -1657,5 +1652,3 @@
+ test_objs := $(test_src:.c=.o)
+ objs := $(objs) $(test_objs)
  endif
 -
--
 -endif  # ifeq ($(makefile_defs, 1)
-diff -ur opensips-2.1.1/Makefile.rules opensips-2.1.1.make/Makefile.rules
---- opensips-2.1.1/Makefile.rules	2015-08-27 17:06:47.000000000 +0200
-+++ opensips-2.1.1.make/Makefile.rules	2016-01-01 14:03:59.144326624 +0100
-@@ -61,25 +61,25 @@
- 		cp $< $@; \
- 	fi
+diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile.rules opensips-2.4.0/Makefile.rules
+--- opensips-2.4.0.orig/Makefile.rules	2018-04-30 21:37:06.000000000 +0900
++++ opensips-2.4.0/Makefile.rules	2018-05-23 19:46:45.491993230 +0900
+@@ -92,26 +92,26 @@
+ 		END { print "#endif /* __MEM_STAT_H_ */\n#endif /* SHM_EXTRA_STATS */"; \
+ 		print "/* modules MD5: $(MODULES_MD5) */"; fflush()}' > $@
  
--$(cfg_prefix)/$(cfg_dir): 
-+$(cfg_dir): 
- 		mkdir -p $(cfg_prefix)/$(cfg_dir)
+-$(cfg_prefix)/$(cfg_dir):
++$(cfg_dir):
+ 		mkdir -m 700 -p $(cfg_prefix)/$(cfg_dir)
  
 -$(bin_prefix)/$(bin_dir):
 +$(bin_dir):
@@ -159,3 +158,4 @@ diff -ur opensips-2.1.1/Makefile.rules opensips-2.1.1.make/Makefile.rules
  		mkdir -p $(data_prefix)/$(data_dir)
  
  
+ .PHONY: dosetrev

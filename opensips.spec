@@ -49,9 +49,9 @@ BuildRequires:	flex
 %{?with_mongodb:BuildRequires:	libmongo-client-devel}
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
 BuildRequires:	libsctp-devel
+BuildRequires:	libuuid-devel
 BuildRequires:	libxml2-devel
 BuildRequires:	libxslt-progs
-BuildRequires:	libuuid-devel
 #BuildRequires:	lynx
 %{?with_mysql:BuildRequires:	mysql-devel}
 BuildRequires:	net-snmp-devel
@@ -397,8 +397,8 @@ LDFLAGS="%{rpmldflags}" \
 	prefix=%{_prefix} \
 	PREFIX=%{_prefix} \
 	LIBDIR=%{_lib} \
-	cfg-prefix=$RPM_BUILD_ROOT \
-	cfg-target=/etc/opensips/ \
+	cfg_prefix=$RPM_BUILD_ROOT \
+cfg_target=%{_sysconfdir}/opensips/ \
 	CC="%{__cc}" \
 	CC_EXTRA_OPTS="-I/usr/include/ncurses" \
 	CFLAGS="%{rpmcflags} -Wcast-align"
@@ -416,8 +416,8 @@ exclude_modules="$(cat exclude_modules)"
 	PREFIX=%{_prefix} \
 	LIBDIR=%{_lib} \
 	BASEDIR=$RPM_BUILD_ROOT \
-	cfg-prefix=$RPM_BUILD_ROOT \
-	cfg-target=/etc/opensips/ \
+	cfg_prefix=$RPM_BUILD_ROOT \
+cfg_target=%{_sysconfdir}/opensips/ \
 	INSTALLMIBDIR=$RPM_BUILD_ROOT%{_datadir}/mibs
 
 for i in modules/*; do \
@@ -742,5 +742,6 @@ fi
 %if %{with rabbitmq}
 %files rabbitmq
 %defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/event_rabbitmq.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rabbitmq.so
 %endif
