@@ -1,0 +1,11 @@
+--- opensips-2.4.0/modules/cgrates/cgrates_cmd.c~	2018-04-30 14:37:06.000000000 +0200
++++ opensips-2.4.0/modules/cgrates/cgrates_cmd.c	2020-05-03 12:18:38.579677771 +0200
+@@ -52,7 +52,7 @@
+ 		val.s.s = (char *)json_object_get_string(jobj);
+ 		break;
+ 	case json_type_boolean:
+-		if (json_object_get_boolean(jobj) == TRUE)
++		if (json_object_get_boolean(jobj) == 1)
+ 			val.n = 1;
+ 		else
+ 			val.n = 0;

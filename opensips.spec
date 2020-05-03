@@ -22,7 +22,7 @@ Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP przekazujący (proxy), przekierowujący i rejestrujący
 Name:		opensips
 Version:	2.4.0
-Release:	4
+Release:	5
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	http://opensips.org/pub/opensips/%{version}/%{name}-%{version}.tar.gz
@@ -32,6 +32,7 @@ Source2:	%{name}.sysconfig
 Source3:	%{name}.service
 Patch0:		x32.patch
 Patch1:		make.patch
+Patch2:		json-c-0.14.patch
 URL:		http://www.opensips.org/
 %{?with_geoip:BuildRequires:	GeoIP-devel}
 %{?with_osp:BuildRequires:	OSPToolkit}
@@ -334,6 +335,7 @@ Interfejs RabbitMQ do openSIPS.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 exclude_modules="%{exclude_modules}"
