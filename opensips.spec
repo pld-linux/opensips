@@ -1,6 +1,7 @@
+# TODO: oracle, lua (lua5.1)
 #
 # Conditional build:
-%bcond_without	mysql		# mysql support
+%bcond_without	mysql		# MySQL support
 %bcond_without	pgsql		# PostgreSQL support
 %bcond_without	sqlite		# Sqlite3 support
 %bcond_without	odbc		# ODBC support
@@ -21,39 +22,41 @@
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP przekazujący (proxy), przekierowujący i rejestrujący
 Name:		opensips
-Version:	2.4.0
-Release:	7
+Version:	2.4.8
+Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
-Source0:	http://opensips.org/pub/opensips/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	0aafe11a30d9724784922667fb98b303
+Source0:	https://opensips.org/pub/opensips/%{version}/%{name}-%{version}.tar.gz
+# Source0-md5:	02ae0094e94d56cb175a542c52a25e39
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Source3:	%{name}.service
 Patch0:		x32.patch
 Patch1:		make.patch
 Patch2:		json-c-0.14.patch
-URL:		http://www.opensips.org/
-%{?with_geoip:BuildRequires:	GeoIP-devel}
+URL:		https://opensips.org/
 %{?with_osp:BuildRequires:	OSPToolkit}
 %{?with_sngtc:BuildRequires:    TODO-SNGTC-BRs}
 BuildRequires:	bison
 BuildRequires:	curl-devel
+BuildRequires:	db-devel
 BuildRequires:	expat-devel
 BuildRequires:	flex
 %{?with_redis:BuildRequires:	hiredis-devel}
 %{?with_json:BuildRequires:	json-c-devel}
 %{?with_carrierroute:BuildRequires:	libconfuse-devel}
 %{?with_couchbase:BuildRequires:    libcouchbase-devel}
+%{?with_geoip:BuildRequires:	libmaxminddb-devel}
 %{?with_memcached:BuildRequires:	libmemcached-devel}
 %{?with_microhttpd:BuildRequires:	libmicrohttpd-devel}
-%{?with_mongodb:BuildRequires:	libmongo-client-devel}
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
 BuildRequires:	libsctp-devel
+%{?with_osp:BuildRequires:	libutf8proc-devel}
 BuildRequires:	libuuid-devel
-BuildRequires:	libxml2-devel
+BuildRequires:	libxml2-devel >= 2.0
 BuildRequires:	libxslt-progs
 #BuildRequires:	lynx
+%{?with_mongodb:BuildRequires:	mongo-c-driver-devel >= 1.0}
 %{?with_mysql:BuildRequires:	mysql-devel}
 BuildRequires:	net-snmp-devel
 %{?with_ldap:BuildRequires:	openldap-devel}
@@ -61,11 +64,13 @@ BuildRequires:	openssl-devel
 BuildRequires:	pcre-devel
 BuildRequires:	perl-devel
 BuildRequires:	perl-tools-devel
+BuildRequires:	pkgconfig
+BuildRequires:	python-devel >= 1:2.5
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel}
 %{?with_radius:BuildRequires:	radiusclient-ng-devel}
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.671
-%{?with_sqlite:BuildRequires:	sqlite3-devel}
+%{?with_sqlite:BuildRequires:	sqlite3-devel >= 3}
 #BuildRequires:	subversion
 %{?with_odbc:BuildRequires:	unixODBC-devel}
 BuildRequires:	which
@@ -470,11 +475,18 @@ fi
 %files
 %defattr(644,root,root,755)
 %doc README* AUTHORS CREDITS ChangeLog INSTALL NEWS scripts examples
-%attr(755,root,root) %{_sbindir}/*
+%attr(755,root,root) %{_sbindir}/bdb_recover
+%attr(755,root,root) %{_sbindir}/opensips
+%attr(755,root,root) %{_sbindir}/opensipsctl
+%attr(755,root,root) %{_sbindir}/opensipsdbctl
+%attr(755,root,root) %{_sbindir}/opensipsunix
+%attr(755,root,root) %{_sbindir}/osipsconfig
+%attr(755,root,root) %{_sbindir}/osipsconsole
 %dir %{_sysconfdir}/opensips
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensips.cfg
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensipsctlrc
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/osipsconsolerc
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/scenario_callcenter.xml
 %dir %attr(700,root,root) %{_sysconfdir}/opensips/tls
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/README
 %attr(600,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/ca.conf
@@ -498,7 +510,8 @@ fi
 %{systemdunitdir}/opensips.service
 %dir %{_libdir}/opensips
 %dir %{_libdir}/opensips/opensipsctl
-%{_libdir}/opensips/opensipsctl/*.*
+%{_libdir}/opensips/opensipsctl/opensipsctl.*
+%{_libdir}/opensips/opensipsctl/opensipsdbctl.*
 %dir %{_libdir}/opensips/opensipsctl/dbtextdb
 %attr(755,root,root) %{_libdir}/opensips/opensipsctl/dbtextdb/dbtextdb.py
 %dir %{_libdir}/opensips/modules
@@ -633,7 +646,10 @@ fi
 %{_datadir}/%{name}/dbtext
 %{_datadir}/%{name}/menuconfig_templates
 %{_datadir}/%{name}/pi_http
-%{_mandir}/man*/*
+%{_mandir}/man5/opensips.cfg.5*
+%{_mandir}/man8/opensips.8*
+%{_mandir}/man8/opensipsctl.8*
+%{_mandir}/man8/opensipsunix.8*
 
 %files xmpp
 %defattr(644,root,root,755)

@@ -1,15 +1,14 @@
-diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensips-2.4.0/Makefile
---- opensips-2.4.0.orig/Makefile	2018-04-30 21:37:06.000000000 +0900
-+++ opensips-2.4.0/Makefile	2018-05-23 19:45:30.853360012 +0900
-@@ -49,7 +49,6 @@
- # default debian version when running 'make deb'
- DEBIAN_VERSION ?= jessie #TODO: can we determine this?
+--- opensips-2.4.8/Makefile.orig	2020-06-15 17:14:49.000000000 +0200
++++ opensips-2.4.8/Makefile	2020-10-09 20:17:09.301016848 +0200
+@@ -46,7 +46,6 @@
+ # whether or not to overwrite TLS certificates
+ tls_overwrite_certs?=
  
 -makefile_defs=0
  DEFS:= $(DEFS_EXTRA_OPTS)
  DEBUG_PARSER?=
  
-@@ -467,7 +466,7 @@
+@@ -474,7 +473,7 @@
  # Install everything (except modules-docbook?)
  install: install-app install-console install-modules-all
  
@@ -18,7 +17,7 @@ diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensip
  	$(MAKE) -C menuconfig proper
  	$(MAKE) -C menuconfig \
  		MENUCONFIG_CFG_PATH=$(data_target)/menuconfig_templates/ \
-@@ -484,14 +483,14 @@
+@@ -491,14 +490,14 @@
  	$(MAKE) -C db/schema
  	-@echo "Done"
  
@@ -38,7 +37,7 @@ diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensip
  		sed -e "s#/usr/.*lib/$(NAME)/modules/#$(modules_target)#g" \
  			< etc/$(NAME).cfg > $(cfg_prefix)/$(cfg_dir)$(NAME).cfg.sample0
  		umask 0077; sed -e "s#/usr/.*etc/$(NAME)/tls/#$(cfg_target)tls/#g" \
-@@ -500,7 +500,7 @@
+@@ -527,7 +526,7 @@
  				$(cfg_prefix)/$(cfg_dir)/osipsconsolerc; \
  		fi
  
@@ -47,16 +46,16 @@ diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensip
  		# install osipsconsole
  		cat scripts/osipsconsole | \
  		sed -e "s#PATH_BIN[ \t]*=[ \t]*\"\./\"#PATH_BIN = \"$(bin-target)\"#g" | \
-@@ -529,7 +528,7 @@
+@@ -540,7 +539,7 @@
  		$(INSTALL_BIN) /tmp/osipsconsole $(bin_prefix)/$(bin_dir)
  		rm -fr /tmp/osipsconsole
  
--install-bin: $(bin_prefix)/$(bin_dir) opensipsmc utils
-+install-bin: $(bin_dir) opensipsmc utils
+-install-bin: app $(bin_prefix)/$(bin_dir) opensipsmc utils
++install-bin: app $(bin_dir) opensipsmc utils
  		# install opensips binary
  		$(INSTALL_TOUCH) $(bin_prefix)/$(bin_dir)/$(NAME)
  		$(INSTALL_BIN) $(NAME) $(bin_prefix)/$(bin_dir)
-@@ -604,7 +603,7 @@
+@@ -611,7 +610,7 @@
  			cd utils/db_oracle; $(MAKE) all ; \
  		fi ;
  
@@ -65,7 +64,7 @@ diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensip
  	@for r in $(modules_full_path) "" ; do \
  		if [ -n "$$r" ]; then \
  			if [ -f "$$r" ]; then \
-@@ -622,7 +621,7 @@
+@@ -629,7 +628,7 @@
  .PHONY: install-doc install-app-doc install-modules-doc
  install-doc: install-app-doc install-modules-doc
  
@@ -74,7 +73,7 @@ diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensip
  	-@for d in $(install_docs) ""; do \
  		if [ -n "$$d" ]; then \
  			$(INSTALL_TOUCH) $(doc_prefix)/$(doc_dir)/"$$d" ; \
-@@ -632,7 +631,7 @@
+@@ -638,7 +637,7 @@
  	done
  
  
@@ -83,7 +82,7 @@ diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensip
  	-@for r in $(modules_basenames) "" ; do \
  		if [ -n "$$r" ]; then \
  			if [ -f modules/"$$r"/README ]; then \
-@@ -642,7 +641,7 @@
+@@ -650,7 +649,7 @@
  	done
  
  
@@ -92,7 +91,7 @@ diff -ur -x .svn -x .git -x .bzr -x CVS -ur opensips-2.4.0.orig/Makefile opensip
  		sed -e "s#/etc/$(NAME)/$(NAME)\.cfg#$(cfg_target)$(NAME).cfg#g" \
  			-e "s#/usr/sbin/#$(bin-target)#g" \
  			-e "s#/usr/lib/$(NAME)/modules/#$(modules_target)#g" \
-@@ -652,7 +651,7 @@
+@@ -677,7 +676,7 @@
  			$(man_prefix)/$(man_dir)/man8/opensipsunix.8
  		chmod 644  $(man_prefix)/$(man_dir)/man8/opensipsunix.8
  
