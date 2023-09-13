@@ -1,4 +1,4 @@
-# TODO: oracle, lua (lua5.1), system wolfssl
+# TODO: oracle, system wolfssl
 #
 # Conditional build:
 %bcond_without	mysql		# MySQL support
@@ -56,6 +56,7 @@ BuildRequires:	libsctp-devel
 BuildRequires:	libuuid-devel
 BuildRequires:	libxml2-devel >= 2.0
 BuildRequires:	libxslt-progs
+BuildRequires:	lua54-devel
 #BuildRequires:	lynx
 %{?with_mongodb:BuildRequires:	mongo-c-driver-devel >= 1.0}
 %{?with_mysql:BuildRequires:	mysql-devel}
@@ -86,8 +87,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # aaa_diameter requires 'freeDiameter/extension.h'
 # cachedb_cassandra requires 'protocol/TBinaryProtocol.h'
-# lua: lua.h
-%define	exclude_modules	aaa_diameter auth_jwt db_oracle cachedb_cassandra lua
+%define	exclude_modules	aaa_diameter auth_jwt db_oracle cachedb_cassandra
 
 %description
 OpenSIPS (Open SIP Server) is a mature Open Source implementation of a
@@ -420,6 +420,7 @@ exclude_modules="$exclude_modules event_kafka"
 %endif
 echo "$exclude_modules" > exclude_modules
 DFLAGS="%{rpmldflags}" \
+LIB_LUA_NAME=lua5.4 \
 %{__make} all \
 	PYTHON=%{__python3} \
 	Q= \
@@ -578,6 +579,7 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/imc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/jsonrpc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/load_balancer.so
+%attr(755,root,root) %{_libdir}/opensips/modules/lua.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mangler.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mathops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/maxfwd.so
