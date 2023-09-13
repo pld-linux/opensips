@@ -1,0 +1,447 @@
+diff -ur opensips-3.4.1/lib/json/Makefile.json opensips-3.4.1.make/lib/json/Makefile.json
+--- opensips-3.4.1/lib/json/Makefile.json	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/lib/json/Makefile.json	2023-09-13 02:53:08.725162011 +0200
+@@ -17,7 +17,7 @@
+ endif
+ 
+ ifeq ($(CROSS_COMPILE),)
+-JSON_BUILDER = $(shell \
++JSON_BUILDER := $(shell \
+ 	if pkg-config --exists json 2> /dev/null; then \
+ 		echo 'pkg-config json'; \
+ 	elif pkg-config --exists json-c 2> /dev/null; then\
+@@ -30,16 +30,16 @@
+ 	DEFS += -I$(LOCALBASE)/include -I$(SYSBASE)/include
+ 	LIBS += -L$(LOCALBASE)/lib -l$(JSONLIB)
+ else
+-	JSON_PKG_VER = $(shell $(JSON_BUILDER) --modversion)
+-	JSON_PKG_MAJOR = $(shell \
++	JSON_PKG_VER := $(shell $(JSON_BUILDER) --modversion)
++	JSON_PKG_MAJOR := $(shell \
+ 		ver_tmp=`echo '$(JSON_PKG_VER)' | cut -f1 -d.`; \
+ 		if [ -z "$$ver_tmp" ]; then ver_tmp=0; fi; \
+ 		echo "$$ver_tmp";)
+-	JSON_PKG_MINOR = $(shell \
++	JSON_PKG_MINOR := $(shell \
+ 		ver_tmp=`echo '$(JSON_PKG_VER)' | cut -f2 -d.`; \
+ 		if [ -z "$$ver_tmp" ]; then ver_tmp=0; fi; \
+ 		echo "$$ver_tmp";)
+-	JSON_PKG_MICRO = $(shell \
++	JSON_PKG_MICRO := $(shell \
+ 		ver_tmp=`echo '$(JSON_PKG_VER)' | cut -f3 -d.`; \
+ 		if [ -z "$$ver_tmp" ]; then ver_tmp=0; fi; \
+ 		echo "$$ver_tmp";)
+diff -ur opensips-3.4.1/Makefile.openssl opensips-3.4.1.make/Makefile.openssl
+--- opensips-3.4.1/Makefile.openssl	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/Makefile.openssl	2023-09-13 02:48:08.336778245 +0200
+@@ -5,7 +5,7 @@
+ DEFS += -Wno-deprecated-declarations
+ 
+ ifeq ($(CROSS_COMPILE),)
+-SSL_BUILDER=$(shell \
++SSL_BUILDER:=$(shell \
+ 	if pkg-config --exists libssl; then \
+ 		echo 'pkg-config libssl'; \
+ 	fi)
+diff -ur opensips-3.4.1/modules/aaa_radius/Makefile opensips-3.4.1.make/modules/aaa_radius/Makefile
+--- opensips-3.4.1/modules/aaa_radius/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/aaa_radius/Makefile	2023-09-13 02:56:40.834593241 +0200
+@@ -13,7 +13,7 @@
+ # Find the radius library we shall use
+ #
+ ifeq ($(RADIUSCLIENT),)
+-RADIUSCLIENT=$(shell if [ -n "`ldconfig -p | grep radcli`" ]; then echo "RADCLI"; \
++RADIUSCLIENT:=$(shell if [ -n "`ldconfig -p | grep radcli`" ]; then echo "RADCLI"; \
+ 	elif [ -n "`ldconfig -p | grep freeradius`" ]; then echo "FREERADIUS"; \
+ 	elif [ -n "`ldconfig -p | grep radiusclient-ng`" ];then echo "RADIUSCLIENT"; fi)
+ endif
+@@ -38,7 +38,7 @@
+ endif
+ 
+ ifeq ($(CROSS_COMPILE),)
+-	BUILDER=$(shell if pkg-config --exists $(RADIUS_PACKET); then \
++	BUILDER:=$(shell if pkg-config --exists $(RADIUS_PACKET); then \
+ 		echo "pkg-config $(RADIUS_PACKET)"; \
+ 	fi)
+ else
+diff -ur opensips-3.4.1/modules/cachedb_mongodb/Makefile opensips-3.4.1.make/modules/cachedb_mongodb/Makefile
+--- opensips-3.4.1/modules/cachedb_mongodb/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/cachedb_mongodb/Makefile	2023-09-13 02:54:01.326590984 +0200
+@@ -10,7 +10,7 @@
+ include ../../lib/json/Makefile.json
+ 
+ ifeq ($(CROSS_COMPILE),)
+-MONGOC_BUILDER = $(shell \
++MONGOC_BUILDER := $(shell \
+ 	if pkg-config --exists libmongoc-1.0; then \
+ 		echo 'pkg-config libmongoc-1.0'; \
+ 	fi)
+diff -ur opensips-3.4.1/modules/cachedb_redis/Makefile opensips-3.4.1.make/modules/cachedb_redis/Makefile
+--- opensips-3.4.1/modules/cachedb_redis/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/cachedb_redis/Makefile	2023-09-13 02:57:29.519726762 +0200
+@@ -9,7 +9,7 @@
+ auto_gen=
+ NAME=cachedb_redis.so
+ 
+-HAVE_REDIS_SSL=$(shell if [ -n "`ldconfig -p | grep hiredis_ssl`" ]; \
++HAVE_REDIS_SSL:=$(shell if [ -n "`ldconfig -p | grep hiredis_ssl`" ]; \
+ 	then echo "HAVE_REDIS_SSL"; fi)
+ ifeq ($(HAVE_REDIS_SSL), HAVE_REDIS_SSL)
+ 	LIBS+=-lhiredis_ssl -lssl -lcrypto
+diff -ur opensips-3.4.1/modules/carrierroute/Makefile opensips-3.4.1.make/modules/carrierroute/Makefile
+--- opensips-3.4.1/modules/carrierroute/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/carrierroute/Makefile	2023-09-13 02:56:03.156634781 +0200
+@@ -9,7 +9,7 @@
+ NAME=carrierroute.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-CONFUSE_BUILDER = $(shell \
++CONFUSE_BUILDER := $(shell \
+ 	if which confuse-config >/dev/null 2>/dev/null;then \
+ 		echo 'confuse-config'; \
+ 	elif pkg-config --exists libconfuse; then \
+diff -ur opensips-3.4.1/modules/cpl_c/Makefile opensips-3.4.1.make/modules/cpl_c/Makefile
+--- opensips-3.4.1/modules/cpl_c/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/cpl_c/Makefile	2023-09-13 04:04:47.993894559 +0200
+@@ -7,7 +7,7 @@
+ NAME=cpl_c.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/db_berkeley/Makefile opensips-3.4.1.make/modules/db_berkeley/Makefile
+--- opensips-3.4.1/modules/db_berkeley/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/db_berkeley/Makefile	2023-09-13 02:57:50.903891339 +0200
+@@ -23,7 +23,7 @@
+ DEFS +=-I$(LOCALBASE)/include -I$(LOCALBASE)/BerkeleyDB.4.6/include \
+ 	-I$(SYSBASE)/include -I$(LOCALBASE)/include/db46 
+ 
+-IS_BSD= $(shell echo "$(OS)" | sed -e 's/^.*bsd/yes/i' )
++IS_BSD:= $(shell echo "$(OS)" | sed -e 's/^.*bsd/yes/i' )
+ ifeq ($(IS_BSD), yes)
+ 	DB_LIB=ldb-4.6
+ else
+diff -ur opensips-3.4.1/modules/db_http/Makefile opensips-3.4.1.make/modules/db_http/Makefile
+--- opensips-3.4.1/modules/db_http/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/db_http/Makefile	2023-09-13 02:58:57.509946567 +0200
+@@ -11,7 +11,7 @@
+ NAME=db_http.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-HAS_BUILDER = $(shell if which curl-config >/dev/null 2>/dev/null;then echo YES; fi)
++HAS_BUILDER := $(shell if which curl-config >/dev/null 2>/dev/null;then echo YES; fi)
+ 
+ ifeq ($(HAS_BUILDER),YES)
+ 	# use autodetection
+diff -ur opensips-3.4.1/modules/db_mysql/Makefile opensips-3.4.1.make/modules/db_mysql/Makefile
+--- opensips-3.4.1/modules/db_mysql/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/db_mysql/Makefile	2023-09-13 02:58:29.035426868 +0200
+@@ -13,7 +13,7 @@
+ # CROSS_COMPILE=true
+ 
+ ifeq ($(CROSS_COMPILE),)
+-HAS_MYSQLCFG=$(shell if which mysql_config >/dev/null 2>/dev/null;then echo YES; fi)
++HAS_MYSQLCFG:=$(shell if which mysql_config >/dev/null 2>/dev/null;then echo YES; fi)
+ endif
+ 
+ ifeq ($(HAS_MYSQLCFG),YES)
+diff -ur opensips-3.4.1/modules/db_postgres/Makefile opensips-3.4.1.make/modules/db_postgres/Makefile
+--- opensips-3.4.1/modules/db_postgres/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/db_postgres/Makefile	2023-09-13 02:57:37.770044746 +0200
+@@ -13,7 +13,7 @@
+ # CROSS_COMPILE=true
+ 
+ ifeq ($(CROSS_COMPILE),)
+-HAS_PGCFG=$(shell if which pg_config >/dev/null 2>/dev/null;then echo YES; fi)
++HAS_PGCFG:=$(shell if which pg_config >/dev/null 2>/dev/null;then echo YES; fi)
+ endif
+ 
+ 
+diff -ur opensips-3.4.1/modules/dialplan/Makefile opensips-3.4.1.make/modules/dialplan/Makefile
+--- opensips-3.4.1/modules/dialplan/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/dialplan/Makefile	2023-09-13 02:57:18.532642157 +0200
+@@ -11,7 +11,7 @@
+ # CROSS_COMPILE=true
+ 
+ ifeq ($(CROSS_COMPILE),)
+-PCRE_BUILDER = $(shell \
++PCRE_BUILDER := $(shell \
+ 	if which pcre-config >/dev/null 2>/dev/null; then \
+ 		echo 'pcre-config'; \
+ 	elif pkg-config --exists libcre; then \
+diff -ur opensips-3.4.1/modules/event_kafka/Makefile opensips-3.4.1.make/modules/event_kafka/Makefile
+--- opensips-3.4.1/modules/event_kafka/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/event_kafka/Makefile	2023-09-13 02:58:04.187752203 +0200
+@@ -5,7 +5,7 @@
+ NAME=event_kafka.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-KAFKA_BUILDER = $(shell \
++KAFKA_BUILDER := $(shell \
+ 	if pkg-config --exists rdkafka; then \
+ 		echo 'pkg-config rdkafka'; \
+ 	fi)
+diff -ur opensips-3.4.1/modules/event_rabbitmq/Makefile opensips-3.4.1.make/modules/event_rabbitmq/Makefile
+--- opensips-3.4.1/modules/event_rabbitmq/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/event_rabbitmq/Makefile	2023-09-13 02:55:23.368717157 +0200
+@@ -7,7 +7,7 @@
+ NAME=event_rabbitmq.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-RABBITMQ_BUILDER = $(shell \
++RABBITMQ_BUILDER := $(shell \
+ 	if pkg-config --exists librabbitmq; then \
+ 		echo 'pkg-config librabbitmq'; \
+ 	fi)
+diff -ur opensips-3.4.1/modules/httpd/Makefile opensips-3.4.1.make/modules/httpd/Makefile
+--- opensips-3.4.1/modules/httpd/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/httpd/Makefile	2023-09-13 02:57:56.944130191 +0200
+@@ -8,7 +8,7 @@
+ # the autodetection
+ # CROSS_COMPILE=true
+ ifeq ($(CROSS_COMPILE),)
+-LIBMICROHTTPD_BUILDER=$(shell \
++LIBMICROHTTPD_BUILDER:=$(shell \
+ 	if pkg-config --exists libmicrohttpd; then \
+ 		echo 'pkg-config libmicrohttpd'; \
+ 	fi)
+diff -ur opensips-3.4.1/modules/lua/Makefile opensips-3.4.1.make/modules/lua/Makefile
+--- opensips-3.4.1/modules/lua/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/lua/Makefile	2023-09-13 02:55:02.768121336 +0200
+@@ -6,7 +6,7 @@
+ auto_gen=
+ NAME=lua.so
+ 
+-MYSQLCFG=$(shell which mysql_config)
++MYSQLCFG:=$(shell which mysql_config)
+ LIB_LUA_NAME?=$(shell \
+ 	if pkg-config --exists lua; then echo lua; \
+ 	elif pkg-config --exists lua5.3; then echo lua5.3; \
+@@ -19,8 +19,8 @@
+ 	elif pkg-config --exists lua-5.1; then echo lua-5.1; \
+ 	elif pkg-config --exists lua51; then echo lua51; fi)
+ 
+-LIB_LUA = $(shell pkg-config --libs $(LIB_LUA_NAME) 2>/dev/null)
+-FLAGS_LUA = $(shell pkg-config --cflags $(LIB_LUA_NAME) 2>/dev/null)
++LIB_LUA := $(shell pkg-config --libs $(LIB_LUA_NAME) 2>/dev/null)
++FLAGS_LUA := $(shell pkg-config --cflags $(LIB_LUA_NAME) 2>/dev/null)
+ ifeq (,$(findstring -l,$(LIB_LUA)))
+ LIB_LUA = -llua
+ endif
+diff -ur opensips-3.4.1/modules/mi_xmlrpc_ng/Makefile opensips-3.4.1.make/modules/mi_xmlrpc_ng/Makefile
+--- opensips-3.4.1/modules/mi_xmlrpc_ng/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/mi_xmlrpc_ng/Makefile	2023-09-13 04:05:39.882483610 +0200
+@@ -5,7 +5,7 @@
+ NAME=mi_xmlrpc_ng.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/mmgeoip/Makefile opensips-3.4.1.make/modules/mmgeoip/Makefile
+--- opensips-3.4.1/modules/mmgeoip/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/mmgeoip/Makefile	2023-09-13 02:57:09.028952592 +0200
+@@ -29,7 +29,7 @@
+ NAME=mmgeoip.so
+ 
+ ifeq ($(GEOIP),)
+-GEOIP=$(shell if [ -n "`ldconfig -p | grep maxminddb`" ]; then echo "GEOIP2"; \
++GEOIP:=$(shell if [ -n "`ldconfig -p | grep maxminddb`" ]; then echo "GEOIP2"; \
+ 	elif [ -n "`ldconfig -p | grep libGeoIP`" ];then echo "GEOIPLEGACY"; fi)
+ endif
+ 
+diff -ur opensips-3.4.1/modules/pi_http/Makefile opensips-3.4.1.make/modules/pi_http/Makefile
+--- opensips-3.4.1/modules/pi_http/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/pi_http/Makefile	2023-09-13 03:50:42.424353468 +0200
+@@ -5,7 +5,7 @@
+ NAME=pi_http.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/presence_dialoginfo/Makefile opensips-3.4.1.make/modules/presence_dialoginfo/Makefile
+--- opensips-3.4.1/modules/presence_dialoginfo/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/presence_dialoginfo/Makefile	2023-09-13 04:05:26.392006524 +0200
+@@ -9,7 +9,7 @@
+ NAME=presence_dialoginfo.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/pua/Makefile opensips-3.4.1.make/modules/pua/Makefile
+--- opensips-3.4.1/modules/pua/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/pua/Makefile	2023-09-13 04:04:28.139704657 +0200
+@@ -10,7 +10,7 @@
+ NAME=pua.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/pua_bla/Makefile opensips-3.4.1.make/modules/pua_bla/Makefile
+--- opensips-3.4.1/modules/pua_bla/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/pua_bla/Makefile	2023-09-13 03:50:34.620619088 +0200
+@@ -10,7 +10,7 @@
+ NAME=pua_bla.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/pua_mi/Makefile opensips-3.4.1.make/modules/pua_mi/Makefile
+--- opensips-3.4.1/modules/pua_mi/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/pua_mi/Makefile	2023-09-13 03:50:24.686775345 +0200
+@@ -10,7 +10,7 @@
+ NAME=pua_mi.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/pua_usrloc/Makefile opensips-3.4.1.make/modules/pua_usrloc/Makefile
+--- opensips-3.4.1/modules/pua_usrloc/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/pua_usrloc/Makefile	2023-09-13 03:49:00.155770081 +0200
+@@ -10,7 +10,7 @@
+ NAME=pua_usrloc.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/pua_xmpp/Makefile opensips-3.4.1.make/modules/pua_xmpp/Makefile
+--- opensips-3.4.1/modules/pua_xmpp/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/pua_xmpp/Makefile	2023-09-13 04:05:32.462222355 +0200
+@@ -10,7 +10,7 @@
+ NAME= pua_xmpp.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/rabbitmq/Makefile opensips-3.4.1.make/modules/rabbitmq/Makefile
+--- opensips-3.4.1/modules/rabbitmq/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/rabbitmq/Makefile	2023-09-13 02:55:56.233074926 +0200
+@@ -8,7 +8,7 @@
+ NAME=rabbitmq.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-RABBITMQ_BUILDER = $(shell \
++RABBITMQ_BUILDER := $(shell \
+ 	if pkg-config --exists librabbitmq; then \
+ 		echo 'pkg-config librabbitmq'; \
+ 	fi)
+diff -ur opensips-3.4.1/modules/rabbitmq_consumer/Makefile opensips-3.4.1.make/modules/rabbitmq_consumer/Makefile
+--- opensips-3.4.1/modules/rabbitmq_consumer/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/rabbitmq_consumer/Makefile	2023-09-13 02:55:45.929411168 +0200
+@@ -7,7 +7,7 @@
+ NAME=rabbitmq_consumer.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-RABBITMQ_BUILDER = $(shell \
++RABBITMQ_BUILDER := $(shell \
+ 	if pkg-config --exists librabbitmq; then \
+ 		echo 'pkg-config librabbitmq'; \
+ 	fi)
+diff -ur opensips-3.4.1/modules/regex/Makefile opensips-3.4.1.make/modules/regex/Makefile
+--- opensips-3.4.1/modules/regex/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/regex/Makefile	2023-09-13 02:53:51.949727353 +0200
+@@ -9,7 +9,7 @@
+ # CROSS_COMPILE=true
+ 
+ ifeq ($(CROSS_COMPILE),)
+-PCRE_BUILDER = $(shell \
++PCRE_BUILDER := $(shell \
+ 	if which pcre-config >/dev/null 2>/dev/null; then \
+ 		echo 'pcre-config'; \
+ 	elif pkg-config --exists libcre; then \
+diff -ur opensips-3.4.1/modules/rls/Makefile opensips-3.4.1.make/modules/rls/Makefile
+--- opensips-3.4.1/modules/rls/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/rls/Makefile	2023-09-13 04:04:07.771987805 +0200
+@@ -10,7 +10,7 @@
+ NAME=rls.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/snmpstats/Makefile opensips-3.4.1.make/modules/snmpstats/Makefile
+--- opensips-3.4.1/modules/snmpstats/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/snmpstats/Makefile	2023-09-13 02:56:23.960669485 +0200
+@@ -4,14 +4,14 @@
+ 
+ include ../../Makefile.defs
+ 
+-HAS_BUILDER = $(shell if which net-snmp-config >/dev/null 2>/dev/null;then echo YES; fi)
++HAS_BUILDER := $(shell if which net-snmp-config >/dev/null 2>/dev/null;then echo YES; fi)
+ 
+ ifeq ($(CROSS_COMPILE),)
+ ifeq ($(HAS_BUILDER),YES)
+ 	# use autodetection
+ 	DEFS += $(shell net-snmp-config --cflags)
+ 	LIBS += $(shell net-snmp-config --netsnmp-agent-libs --external-agent-libs)
+-	INSTALLMIBDIR = $(cfg_prefix)$(shell net-snmp-config --prefix)/share/snmp/mibs
++	INSTALLMIBDIR := $(cfg_prefix)$(shell net-snmp-config --prefix)/share/snmp/mibs
+ endif
+ else
+ 	# use standard know paths
+diff -ur opensips-3.4.1/modules/stir_shaken/Makefile opensips-3.4.1.make/modules/stir_shaken/Makefile
+--- opensips-3.4.1/modules/stir_shaken/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/stir_shaken/Makefile	2023-09-13 02:55:32.292320007 +0200
+@@ -6,7 +6,7 @@
+ NAME=stir_shaken.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-SSL_BUILDER=$(shell \
++SSL_BUILDER:=$(shell \
+ 	if pkg-config --exists libcrypto; then \
+ 		echo 'pkg-config libcrypto'; \
+ 	fi)
+diff -ur opensips-3.4.1/modules/xcap/Makefile opensips-3.4.1.make/modules/xcap/Makefile
+--- opensips-3.4.1/modules/xcap/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/xcap/Makefile	2023-09-13 04:05:18.831734397 +0200
+@@ -10,7 +10,7 @@
+ NAME=xcap.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
++XML2CFG:=$(shell which xml2-config)
+ endif
+ 
+ ifneq ($(XML2CFG),)
+diff -ur opensips-3.4.1/modules/xcap_client/Makefile opensips-3.4.1.make/modules/xcap_client/Makefile
+--- opensips-3.4.1/modules/xcap_client/Makefile	2023-08-31 15:30:47.000000000 +0200
++++ opensips-3.4.1.make/modules/xcap_client/Makefile	2023-09-13 02:58:20.035058673 +0200
+@@ -10,8 +10,8 @@
+ NAME=xcap_client.so
+ 
+ ifeq ($(CROSS_COMPILE),)
+-XML2CFG=$(shell which xml2-config)
+-CURL_BUILDER=$(shell \
++XML2CFG:=$(shell which xml2-config)
++CURL_BUILDER:=$(shell \
+ 	if pkg-config --exists libcurl; then \
+ 		echo 'pkg-config libcurl'; \
+ 	else \

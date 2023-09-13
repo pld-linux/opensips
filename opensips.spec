@@ -1,4 +1,4 @@
-# TODO: oracle, lua (lua5.1)
+# TODO: oracle, lua (lua5.1), system wolfssl
 #
 # Conditional build:
 %bcond_without	mysql		# MySQL support
@@ -13,27 +13,28 @@
 %bcond_without	json		# json support
 %bcond_without	memcached	# memcached support
 %bcond_without	microhttpd	# httpd support
+%bcond_without	kafka		# Apache Kafka support
 %bcond_without	redis		# Redis support
 %bcond_with	couchbase	# couchbase support
 %bcond_with	mongodb		# mongodb support
 %bcond_with	sngtc		# Sangoma transcoding module support
 %bcond_without	rabbitmq	# Rabbit MQ support
+%bcond_with	wolfssl		# WolfSSL support (builds internal WolfSSL :( )
 
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP przekazujący (proxy), przekierowujący i rejestrujący
 Name:		opensips
-Version:	2.4.8
-Release:	8
+Version:	3.4.1
+Release:	0.1
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	https://opensips.org/pub/opensips/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	02ae0094e94d56cb175a542c52a25e39
+# Source0-md5:	e889ffaddf770e945e77ebeca5f30fa4
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Source3:	%{name}.service
 Patch0:		x32.patch
-Patch1:		make.patch
-Patch2:		json-c-0.14.patch
+Patch1:		make-4.4.patch
 URL:		https://opensips.org/
 %{?with_osp:BuildRequires:	OSPToolkit}
 %{?with_sngtc:BuildRequires:    TODO-SNGTC-BRs}
@@ -68,13 +69,14 @@ BuildRequires:	pkgconfig
 BuildRequires:	python-devel >= 1:2.5
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel}
 %{?with_radius:BuildRequires:	radiusclient-ng-devel}
+%{?with_kafka:BuildRequires:	librdkafka-devel}
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.671
 %{?with_sqlite:BuildRequires:	sqlite3-devel >= 3}
 #BuildRequires:	subversion
 %{?with_odbc:BuildRequires:	unixODBC-devel}
 BuildRequires:	which
-#BuildRequires:	xmlrpc-c-devel >= 1.10.0
+BuildRequires:	xmlrpc-c-devel >= 1.10.0
 BuildRequires:	zlib-devel
 Requires(post,preun):	/sbin/chkconfig
 Requires:	rc-scripts
@@ -82,10 +84,10 @@ Requires:	systemd-units >= 38
 Suggests:	python-modules
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-# mi_xmlrpc requires xmlrpc-c-devel in version 1.9 only
+# aaa_diameter requires 'freeDiameter/extension.h'
 # cachedb_cassandra requires 'protocol/TBinaryProtocol.h'
 # lua: lua.h
-%define	exclude_modules	mi_xmlrpc db_oracle cachedb_cassandra lua
+%define	exclude_modules	aaa_diameter auth_jwt db_oracle cachedb_cassandra lua
 
 %description
 OpenSIPS (Open SIP Server) is a mature Open Source implementation of a
@@ -336,13 +338,24 @@ RabbitMQ interface to openSIPS.
 %description rabbitmq -l pl.UTF-8
 Interfejs RabbitMQ do openSIPS.
 
+%package kafka
+Summary:	Apache Kafka interface to openSIPS
+Summary(pl.UTF-8):	Interfejs Apache Kafka do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description kafka
+Apache Kafka interface to openSIPS.
+
+%description kafka -l pl.UTF-8
+Interfejs Apache Kafka do openSIPS.
+
 %prep
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
 
-%{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
+%{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python3}\1,' \
       scripts/dbtextdb/dbtextdb.py
 
 %build
@@ -399,9 +412,16 @@ exclude_modules="$exclude_modules sngtc"
 %if %{without rabbitmq}
 exclude_modules="$exclude_modules rabbitmq"
 %endif
+%if %{without wolfssl}
+exclude_modules="$exclude_modules tls_wolfssl"
+%endif
+%if %{without kafka}
+exclude_modules="$exclude_modules event_kafka"
+%endif
 echo "$exclude_modules" > exclude_modules
-LDFLAGS="%{rpmldflags}" \
+DFLAGS="%{rpmldflags}" \
 %{__make} all \
+	PYTHON=%{__python3} \
 	Q= \
 	exclude_modules="$exclude_modules" \
 	prefix=%{_prefix} \
@@ -477,15 +497,9 @@ fi
 %doc README* AUTHORS CREDITS ChangeLog INSTALL NEWS scripts examples
 %attr(755,root,root) %{_sbindir}/bdb_recover
 %attr(755,root,root) %{_sbindir}/opensips
-%attr(755,root,root) %{_sbindir}/opensipsctl
-%attr(755,root,root) %{_sbindir}/opensipsdbctl
-%attr(755,root,root) %{_sbindir}/opensipsunix
 %attr(755,root,root) %{_sbindir}/osipsconfig
-%attr(755,root,root) %{_sbindir}/osipsconsole
 %dir %{_sysconfdir}/opensips
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensips.cfg
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/opensipsctlrc
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/osipsconsolerc
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/scenario_callcenter.xml
 %dir %attr(700,root,root) %{_sysconfdir}/opensips/tls
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/tls/README
@@ -509,11 +523,6 @@ fi
 %attr(754,root,root) /etc/rc.d/init.d/opensips
 %{systemdunitdir}/opensips.service
 %dir %{_libdir}/opensips
-%dir %{_libdir}/opensips/opensipsctl
-%{_libdir}/opensips/opensipsctl/opensipsctl.*
-%{_libdir}/opensips/opensipsctl/opensipsdbctl.*
-%dir %{_libdir}/opensips/opensipsctl/dbtextdb
-%attr(755,root,root) %{_libdir}/opensips/opensipsctl/dbtextdb/dbtextdb.py
 %dir %{_libdir}/opensips/modules
 # explict list here, no globs please (to avoid mistakes)
 %attr(755,root,root) %{_libdir}/opensips/modules/acc.so
@@ -525,11 +534,13 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/b2b_entities.so
 %attr(755,root,root) %{_libdir}/opensips/modules/b2b_logic.so
 %attr(755,root,root) %{_libdir}/opensips/modules/b2b_sca.so
+%attr(755,root,root) %{_libdir}/opensips/modules/b2b_sdp_demux.so
 %attr(755,root,root) %{_libdir}/opensips/modules/benchmark.so
 %attr(755,root,root) %{_libdir}/opensips/modules/cachedb_local.so
 %attr(755,root,root) %{_libdir}/opensips/modules/cachedb_sql.so
 %attr(755,root,root) %{_libdir}/opensips/modules/call_center.so
 %attr(755,root,root) %{_libdir}/opensips/modules/call_control.so
+%attr(755,root,root) %{_libdir}/opensips/modules/callops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/cfgutils.so
 %attr(755,root,root) %{_libdir}/opensips/modules/clusterer.so
 %attr(755,root,root) %{_libdir}/opensips/modules/compression.so
@@ -552,9 +563,9 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/enum.so
 %attr(755,root,root) %{_libdir}/opensips/modules/event_datagram.so
 %attr(755,root,root) %{_libdir}/opensips/modules/event_flatstore.so
-%attr(755,root,root) %{_libdir}/opensips/modules/event_jsonrpc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/event_route.so
 %attr(755,root,root) %{_libdir}/opensips/modules/event_routing.so
+%attr(755,root,root) %{_libdir}/opensips/modules/event_stream.so
 %attr(755,root,root) %{_libdir}/opensips/modules/event_virtual.so
 %attr(755,root,root) %{_libdir}/opensips/modules/event_xmlrpc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/exec.so
@@ -570,13 +581,18 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/mangler.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mathops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/maxfwd.so
+%attr(755,root,root) %{_libdir}/opensips/modules/media_exchange.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mediaproxy.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mi_datagram.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mid_registrar.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mi_fifo.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mi_json.so
+%attr(755,root,root) %{_libdir}/opensips/modules/mi_html.so
+%attr(755,root,root) %{_libdir}/opensips/modules/mi_script.so
 %attr(755,root,root) %{_libdir}/opensips/modules/mi_xmlrpc_ng.so
 %attr(755,root,root) %{_libdir}/opensips/modules/msilo.so
+%attr(755,root,root) %{_libdir}/opensips/modules/msrp_gateway.so
+%attr(755,root,root) %{_libdir}/opensips/modules/msrp_relay.so
+%attr(755,root,root) %{_libdir}/opensips/modules/msrp_ua.so
 %attr(755,root,root) %{_libdir}/opensips/modules/nathelper.so
 %attr(755,root,root) %{_libdir}/opensips/modules/nat_traversal.so
 %attr(755,root,root) %{_libdir}/opensips/modules/options.so
@@ -589,11 +605,16 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_dialoginfo.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_mwi.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence.so
+%attr(755,root,root) %{_libdir}/opensips/modules/presence_dfks.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_xcapdiff.so
 %attr(755,root,root) %{_libdir}/opensips/modules/presence_xml.so
+%attr(755,root,root) %{_libdir}/opensips/modules/prometheus.so
 %attr(755,root,root) %{_libdir}/opensips/modules/proto_bin.so
+%attr(755,root,root) %{_libdir}/opensips/modules/proto_bins.so
 %attr(755,root,root) %{_libdir}/opensips/modules/proto_hep.so
+%attr(755,root,root) %{_libdir}/opensips/modules/proto_msrp.so
 %attr(755,root,root) %{_libdir}/opensips/modules/proto_sctp.so
+%attr(755,root,root) %{_libdir}/opensips/modules/proto_smpp.so
 %attr(755,root,root) %{_libdir}/opensips/modules/proto_tls.so
 %attr(755,root,root) %{_libdir}/opensips/modules/proto_ws.so
 %attr(755,root,root) %{_libdir}/opensips/modules/proto_wss.so
@@ -604,40 +625,45 @@ fi
 %attr(755,root,root) %{_libdir}/opensips/modules/pua_usrloc.so
 %attr(755,root,root) %{_libdir}/opensips/modules/python.so
 %attr(755,root,root) %{_libdir}/opensips/modules/qos.so
+%attr(755,root,root) %{_libdir}/opensips/modules/qrouting.so
+%attr(755,root,root) %{_libdir}/opensips/modules/rate_cacher.so
 %attr(755,root,root) %{_libdir}/opensips/modules/ratelimit.so
 %attr(755,root,root) %{_libdir}/opensips/modules/regex.so
 %attr(755,root,root) %{_libdir}/opensips/modules/registrar.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rest_client.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rls.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rr.so
+%attr(755,root,root) %{_libdir}/opensips/modules/rtp_relay.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rtpengine.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rtpproxy.so
 %attr(755,root,root) %{_libdir}/opensips/modules/script_helper.so
-%attr(755,root,root) %{_libdir}/opensips/modules/seas.so
 %attr(755,root,root) %{_libdir}/opensips/modules/signaling.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sipcapture.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sip_i.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sipmsgops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/siprec.so
-%attr(755,root,root) %{_libdir}/opensips/modules/siptrace.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sl.so
-%attr(755,root,root) %{_libdir}/opensips/modules/sms.so
 %attr(755,root,root) %{_libdir}/opensips/modules/speeddial.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sql_cacher.so
 %attr(755,root,root) %{_libdir}/opensips/modules/sst.so
 %attr(755,root,root) %{_libdir}/opensips/modules/statistics.so
+%attr(755,root,root) %{_libdir}/opensips/modules/status_report.so
+%attr(755,root,root) %{_libdir}/opensips/modules/stir_shaken.so
 %attr(755,root,root) %{_libdir}/opensips/modules/stun.so
+%attr(755,root,root) %{_libdir}/opensips/modules/tcp_mgm.so
 %attr(755,root,root) %{_libdir}/opensips/modules/textops.so
 %attr(755,root,root) %{_libdir}/opensips/modules/tls_mgm.so
+%attr(755,root,root) %{_libdir}/opensips/modules/tls_openssl.so
 %attr(755,root,root) %{_libdir}/opensips/modules/tm.so
 %attr(755,root,root) %{_libdir}/opensips/modules/topology_hiding.so
+%attr(755,root,root) %{_libdir}/opensips/modules/tracer.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uac_auth.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uac_redirect.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uac_registrant.so
 %attr(755,root,root) %{_libdir}/opensips/modules/uac.so
-%attr(755,root,root) %{_libdir}/opensips/modules/uri.so
 %attr(755,root,root) %{_libdir}/opensips/modules/userblacklist.so
 %attr(755,root,root) %{_libdir}/opensips/modules/usrloc.so
+%attr(755,root,root) %{_libdir}/opensips/modules/uuid.so
 %attr(755,root,root) %{_libdir}/opensips/modules/xcap_client.so
 %attr(755,root,root) %{_libdir}/opensips/modules/xcap.so
 %attr(755,root,root) %{_libdir}/opensips/modules/xml.so
@@ -648,8 +674,6 @@ fi
 %{_datadir}/%{name}/pi_http
 %{_mandir}/man5/opensips.cfg.5*
 %{_mandir}/man8/opensips.8*
-%{_mandir}/man8/opensipsctl.8*
-%{_mandir}/man8/opensipsunix.8*
 
 %files xmpp
 %defattr(644,root,root,755)
@@ -766,4 +790,11 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/opensips/modules/event_rabbitmq.so
 %attr(755,root,root) %{_libdir}/opensips/modules/rabbitmq.so
+%attr(755,root,root) %{_libdir}/opensips/modules/rabbitmq_consumer.so
+%endif
+
+%if %{with kafka}
+%files kafka
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/opensips/modules/event_kafka.so
 %endif
