@@ -51,6 +51,7 @@ BuildRequires:	flex
 %{?with_memcached:BuildRequires:	libmemcached-devel}
 %{?with_microhttpd:BuildRequires:	libmicrohttpd-devel}
 %{?with_pgsql:BuildRequires:	libpqxx-devel}
+%{?with_kafka:BuildRequires:	librdkafka-devel}
 BuildRequires:	libsctp-devel
 %{?with_osp:BuildRequires:	libutf8proc-devel}
 BuildRequires:	libuuid-devel
@@ -70,7 +71,6 @@ BuildRequires:	pkgconfig
 BuildRequires:	python-devel >= 1:2.5
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel}
 %{?with_radius:BuildRequires:	radiusclient-ng-devel}
-%{?with_kafka:BuildRequires:	librdkafka-devel}
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.671
 %{?with_sqlite:BuildRequires:	sqlite3-devel >= 3}
@@ -352,8 +352,8 @@ Interfejs Apache Kafka do openSIPS.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
+%patch -P 0 -p1
+%patch -P 1 -p1
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python3}\1,' \
       scripts/dbtextdb/dbtextdb.py
