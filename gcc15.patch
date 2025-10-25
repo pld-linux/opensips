@@ -1,0 +1,52 @@
+--- opensips-3.4.15/modules/statistics/statistics.c~	2025-10-23 15:40:53.000000000 +0200
++++ opensips-3.4.15/modules/statistics/statistics.c	2025-10-25 16:26:07.273326023 +0200
+@@ -98,8 +98,8 @@
+ 		unsigned int nr;
+ 	} avg;
+ 	struct {
+-		unsigned long true;
+-		unsigned long false;
++		unsigned long true_;
++		unsigned long false_;
+ 	} perc;
+ 	long acc;
+ };
+@@ -919,8 +919,8 @@
+ 			ss->cache.acc -= slot->acc;
+ 			break;
+ 		case STAT_ALG_PERC:
+-			ss->cache.perc.true -= slot->perc.true;
+-			ss->cache.perc.false -= slot->perc.false;
++			ss->cache.perc.true_ -= slot->perc.true_;
++			ss->cache.perc.false_ -= slot->perc.false_;
+ 			break;
+ 		default:
+ 			LM_ERR("unknown profile algorithm %d\n", ss->profile->algorithm);
+@@ -984,9 +984,9 @@
+ 			ret = ss->cache.acc;
+ 			break;
+ 		case STAT_ALG_PERC:
+-			total = ss->cache.perc.true + ss->cache.perc.false;
++			total = ss->cache.perc.true_ + ss->cache.perc.false_;
+ 			if (total != 0)
+-				ret = ss->cache.perc.true * ss->profile->factor / total;
++				ret = ss->cache.perc.true_ * ss->profile->factor / total;
+ 			break;
+ 		default:
+ 			LM_ERR("unknown profile algorithm %d\n", ss->profile->algorithm);
+@@ -1072,11 +1072,11 @@
+ 			break;
+ 		case STAT_ALG_PERC:
+ 			if (value > 0) {
+-				s->perc.true += value;
+-				ss->cache.perc.true += value;
++				s->perc.true_ += value;
++				ss->cache.perc.true_ += value;
+ 			} else {
+-				s->perc.false -= value;
+-				ss->cache.perc.false -= value;
++				s->perc.false_ -= value;
++				ss->cache.perc.false_ -= value;
+ 			}
+ 			break;
+ 		default:

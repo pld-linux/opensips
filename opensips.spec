@@ -24,17 +24,18 @@
 Summary:	SIP proxy, redirect and registrar server
 Summary(pl.UTF-8):	Serwer SIP przekazujący (proxy), przekierowujący i rejestrujący
 Name:		opensips
-Version:	3.4.1
-Release:	7
+Version:	3.4.15
+Release:	1
 License:	GPL v2
 Group:		Networking/Daemons
 Source0:	https://opensips.org/pub/opensips/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	e889ffaddf770e945e77ebeca5f30fa4
+# Source0-md5:	d8235ceae0b0ec9e31e0bc45b5df832c
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Source3:	%{name}.service
 Patch0:		x32.patch
 Patch1:		make-4.4.patch
+Patch2:		gcc15.patch
 URL:		https://opensips.org/
 %{?with_osp:BuildRequires:	OSPToolkit}
 %{?with_sngtc:BuildRequires:    TODO-SNGTC-BRs}
@@ -352,8 +353,9 @@ Interfejs Apache Kafka do openSIPS.
 
 %prep
 %setup -q
-%patch -P 0 -p1
-%patch -P 1 -p1
+%patch -P0 -p1
+%patch -P1 -p1
+%patch -P2 -p1
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python3}\1,' \
       scripts/dbtextdb/dbtextdb.py
@@ -526,149 +528,149 @@ fi
 %dir %{_libdir}/opensips
 %dir %{_libdir}/opensips/modules
 # explict list here, no globs please (to avoid mistakes)
-%attr(755,root,root) %{_libdir}/opensips/modules/acc.so
-%attr(755,root,root) %{_libdir}/opensips/modules/alias_db.so
-%attr(755,root,root) %{_libdir}/opensips/modules/auth_aaa.so
-%attr(755,root,root) %{_libdir}/opensips/modules/auth_db.so
-%attr(755,root,root) %{_libdir}/opensips/modules/auth.so
-%attr(755,root,root) %{_libdir}/opensips/modules/avpops.so
-%attr(755,root,root) %{_libdir}/opensips/modules/b2b_entities.so
-%attr(755,root,root) %{_libdir}/opensips/modules/b2b_logic.so
-%attr(755,root,root) %{_libdir}/opensips/modules/b2b_sca.so
-%attr(755,root,root) %{_libdir}/opensips/modules/b2b_sdp_demux.so
-%attr(755,root,root) %{_libdir}/opensips/modules/benchmark.so
-%attr(755,root,root) %{_libdir}/opensips/modules/cachedb_local.so
-%attr(755,root,root) %{_libdir}/opensips/modules/cachedb_sql.so
-%attr(755,root,root) %{_libdir}/opensips/modules/call_center.so
-%attr(755,root,root) %{_libdir}/opensips/modules/call_control.so
-%attr(755,root,root) %{_libdir}/opensips/modules/callops.so
-%attr(755,root,root) %{_libdir}/opensips/modules/cfgutils.so
-%attr(755,root,root) %{_libdir}/opensips/modules/clusterer.so
-%attr(755,root,root) %{_libdir}/opensips/modules/compression.so
-%attr(755,root,root) %{_libdir}/opensips/modules/cpl_c.so
-%attr(755,root,root) %{_libdir}/opensips/modules/db_berkeley.so
-%attr(755,root,root) %{_libdir}/opensips/modules/db_cachedb.so
-%attr(755,root,root) %{_libdir}/opensips/modules/db_flatstore.so
-%attr(755,root,root) %{_libdir}/opensips/modules/db_http.so
-%attr(755,root,root) %{_libdir}/opensips/modules/db_text.so
-%attr(755,root,root) %{_libdir}/opensips/modules/db_virtual.so
-%attr(755,root,root) %{_libdir}/opensips/modules/dialog.so
-%attr(755,root,root) %{_libdir}/opensips/modules/dialplan.so
-%attr(755,root,root) %{_libdir}/opensips/modules/dispatcher.so
-%attr(755,root,root) %{_libdir}/opensips/modules/diversion.so
-%attr(755,root,root) %{_libdir}/opensips/modules/dns_cache.so
-%attr(755,root,root) %{_libdir}/opensips/modules/domainpolicy.so
-%attr(755,root,root) %{_libdir}/opensips/modules/domain.so
-%attr(755,root,root) %{_libdir}/opensips/modules/drouting.so
-%attr(755,root,root) %{_libdir}/opensips/modules/emergency.so
-%attr(755,root,root) %{_libdir}/opensips/modules/enum.so
-%attr(755,root,root) %{_libdir}/opensips/modules/event_datagram.so
-%attr(755,root,root) %{_libdir}/opensips/modules/event_flatstore.so
-%attr(755,root,root) %{_libdir}/opensips/modules/event_route.so
-%attr(755,root,root) %{_libdir}/opensips/modules/event_routing.so
-%attr(755,root,root) %{_libdir}/opensips/modules/event_stream.so
-%attr(755,root,root) %{_libdir}/opensips/modules/event_virtual.so
-%attr(755,root,root) %{_libdir}/opensips/modules/event_xmlrpc.so
-%attr(755,root,root) %{_libdir}/opensips/modules/exec.so
-%attr(755,root,root) %{_libdir}/opensips/modules/fraud_detection.so
-%attr(755,root,root) %{_libdir}/opensips/modules/freeswitch_scripting.so
-%attr(755,root,root) %{_libdir}/opensips/modules/freeswitch.so
-%attr(755,root,root) %{_libdir}/opensips/modules/gflags.so
-%attr(755,root,root) %{_libdir}/opensips/modules/group.so
-%attr(755,root,root) %{_libdir}/opensips/modules/identity.so
-%attr(755,root,root) %{_libdir}/opensips/modules/imc.so
-%attr(755,root,root) %{_libdir}/opensips/modules/jsonrpc.so
-%attr(755,root,root) %{_libdir}/opensips/modules/load_balancer.so
-%attr(755,root,root) %{_libdir}/opensips/modules/lua.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mangler.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mathops.so
-%attr(755,root,root) %{_libdir}/opensips/modules/maxfwd.so
-%attr(755,root,root) %{_libdir}/opensips/modules/media_exchange.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mediaproxy.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mi_datagram.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mid_registrar.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mi_fifo.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mi_html.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mi_script.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mi_xmlrpc_ng.so
-%attr(755,root,root) %{_libdir}/opensips/modules/msilo.so
-%attr(755,root,root) %{_libdir}/opensips/modules/msrp_gateway.so
-%attr(755,root,root) %{_libdir}/opensips/modules/msrp_relay.so
-%attr(755,root,root) %{_libdir}/opensips/modules/msrp_ua.so
-%attr(755,root,root) %{_libdir}/opensips/modules/nathelper.so
-%attr(755,root,root) %{_libdir}/opensips/modules/nat_traversal.so
-%attr(755,root,root) %{_libdir}/opensips/modules/options.so
-%attr(755,root,root) %{_libdir}/opensips/modules/path.so
-%attr(755,root,root) %{_libdir}/opensips/modules/peering.so
-%attr(755,root,root) %{_libdir}/opensips/modules/permissions.so
-%attr(755,root,root) %{_libdir}/opensips/modules/pi_http.so
-%attr(755,root,root) %{_libdir}/opensips/modules/pike.so
-%attr(755,root,root) %{_libdir}/opensips/modules/presence_callinfo.so
-%attr(755,root,root) %{_libdir}/opensips/modules/presence_dialoginfo.so
-%attr(755,root,root) %{_libdir}/opensips/modules/presence_mwi.so
-%attr(755,root,root) %{_libdir}/opensips/modules/presence.so
-%attr(755,root,root) %{_libdir}/opensips/modules/presence_dfks.so
-%attr(755,root,root) %{_libdir}/opensips/modules/presence_xcapdiff.so
-%attr(755,root,root) %{_libdir}/opensips/modules/presence_xml.so
-%attr(755,root,root) %{_libdir}/opensips/modules/prometheus.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_bin.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_bins.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_hep.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_msrp.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_sctp.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_smpp.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_tls.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_ws.so
-%attr(755,root,root) %{_libdir}/opensips/modules/proto_wss.so
-%attr(755,root,root) %{_libdir}/opensips/modules/pua_bla.so
-%attr(755,root,root) %{_libdir}/opensips/modules/pua_dialoginfo.so
-%attr(755,root,root) %{_libdir}/opensips/modules/pua_mi.so
-%attr(755,root,root) %{_libdir}/opensips/modules/pua.so
-%attr(755,root,root) %{_libdir}/opensips/modules/pua_usrloc.so
-%attr(755,root,root) %{_libdir}/opensips/modules/python.so
-%attr(755,root,root) %{_libdir}/opensips/modules/qos.so
-%attr(755,root,root) %{_libdir}/opensips/modules/qrouting.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rate_cacher.so
-%attr(755,root,root) %{_libdir}/opensips/modules/ratelimit.so
-%attr(755,root,root) %{_libdir}/opensips/modules/regex.so
-%attr(755,root,root) %{_libdir}/opensips/modules/registrar.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rest_client.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rls.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rr.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rtp_relay.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rtpengine.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rtpproxy.so
-%attr(755,root,root) %{_libdir}/opensips/modules/script_helper.so
-%attr(755,root,root) %{_libdir}/opensips/modules/signaling.so
-%attr(755,root,root) %{_libdir}/opensips/modules/sipcapture.so
-%attr(755,root,root) %{_libdir}/opensips/modules/sip_i.so
-%attr(755,root,root) %{_libdir}/opensips/modules/sipmsgops.so
-%attr(755,root,root) %{_libdir}/opensips/modules/siprec.so
-%attr(755,root,root) %{_libdir}/opensips/modules/sl.so
-%attr(755,root,root) %{_libdir}/opensips/modules/speeddial.so
-%attr(755,root,root) %{_libdir}/opensips/modules/sql_cacher.so
-%attr(755,root,root) %{_libdir}/opensips/modules/sst.so
-%attr(755,root,root) %{_libdir}/opensips/modules/statistics.so
-%attr(755,root,root) %{_libdir}/opensips/modules/status_report.so
-%attr(755,root,root) %{_libdir}/opensips/modules/stir_shaken.so
-%attr(755,root,root) %{_libdir}/opensips/modules/stun.so
-%attr(755,root,root) %{_libdir}/opensips/modules/tcp_mgm.so
-%attr(755,root,root) %{_libdir}/opensips/modules/textops.so
-%attr(755,root,root) %{_libdir}/opensips/modules/tls_mgm.so
-%attr(755,root,root) %{_libdir}/opensips/modules/tls_openssl.so
-%attr(755,root,root) %{_libdir}/opensips/modules/tm.so
-%attr(755,root,root) %{_libdir}/opensips/modules/topology_hiding.so
-%attr(755,root,root) %{_libdir}/opensips/modules/tracer.so
-%attr(755,root,root) %{_libdir}/opensips/modules/uac_auth.so
-%attr(755,root,root) %{_libdir}/opensips/modules/uac_redirect.so
-%attr(755,root,root) %{_libdir}/opensips/modules/uac_registrant.so
-%attr(755,root,root) %{_libdir}/opensips/modules/uac.so
-%attr(755,root,root) %{_libdir}/opensips/modules/userblacklist.so
-%attr(755,root,root) %{_libdir}/opensips/modules/usrloc.so
-%attr(755,root,root) %{_libdir}/opensips/modules/uuid.so
-%attr(755,root,root) %{_libdir}/opensips/modules/xcap_client.so
-%attr(755,root,root) %{_libdir}/opensips/modules/xcap.so
-%attr(755,root,root) %{_libdir}/opensips/modules/xml.so
+%{_libdir}/opensips/modules/acc.so
+%{_libdir}/opensips/modules/alias_db.so
+%{_libdir}/opensips/modules/auth_aaa.so
+%{_libdir}/opensips/modules/auth_db.so
+%{_libdir}/opensips/modules/auth.so
+%{_libdir}/opensips/modules/avpops.so
+%{_libdir}/opensips/modules/b2b_entities.so
+%{_libdir}/opensips/modules/b2b_logic.so
+%{_libdir}/opensips/modules/b2b_sca.so
+%{_libdir}/opensips/modules/b2b_sdp_demux.so
+%{_libdir}/opensips/modules/benchmark.so
+%{_libdir}/opensips/modules/cachedb_local.so
+%{_libdir}/opensips/modules/cachedb_sql.so
+%{_libdir}/opensips/modules/call_center.so
+%{_libdir}/opensips/modules/call_control.so
+%{_libdir}/opensips/modules/callops.so
+%{_libdir}/opensips/modules/cfgutils.so
+%{_libdir}/opensips/modules/clusterer.so
+%{_libdir}/opensips/modules/compression.so
+%{_libdir}/opensips/modules/cpl_c.so
+%{_libdir}/opensips/modules/db_berkeley.so
+%{_libdir}/opensips/modules/db_cachedb.so
+%{_libdir}/opensips/modules/db_flatstore.so
+%{_libdir}/opensips/modules/db_http.so
+%{_libdir}/opensips/modules/db_text.so
+%{_libdir}/opensips/modules/db_virtual.so
+%{_libdir}/opensips/modules/dialog.so
+%{_libdir}/opensips/modules/dialplan.so
+%{_libdir}/opensips/modules/dispatcher.so
+%{_libdir}/opensips/modules/diversion.so
+%{_libdir}/opensips/modules/dns_cache.so
+%{_libdir}/opensips/modules/domainpolicy.so
+%{_libdir}/opensips/modules/domain.so
+%{_libdir}/opensips/modules/drouting.so
+%{_libdir}/opensips/modules/emergency.so
+%{_libdir}/opensips/modules/enum.so
+%{_libdir}/opensips/modules/event_datagram.so
+%{_libdir}/opensips/modules/event_flatstore.so
+%{_libdir}/opensips/modules/event_route.so
+%{_libdir}/opensips/modules/event_routing.so
+%{_libdir}/opensips/modules/event_stream.so
+%{_libdir}/opensips/modules/event_virtual.so
+%{_libdir}/opensips/modules/event_xmlrpc.so
+%{_libdir}/opensips/modules/exec.so
+%{_libdir}/opensips/modules/fraud_detection.so
+%{_libdir}/opensips/modules/freeswitch_scripting.so
+%{_libdir}/opensips/modules/freeswitch.so
+%{_libdir}/opensips/modules/gflags.so
+%{_libdir}/opensips/modules/group.so
+%{_libdir}/opensips/modules/identity.so
+%{_libdir}/opensips/modules/imc.so
+%{_libdir}/opensips/modules/jsonrpc.so
+%{_libdir}/opensips/modules/load_balancer.so
+%{_libdir}/opensips/modules/lua.so
+%{_libdir}/opensips/modules/mangler.so
+%{_libdir}/opensips/modules/mathops.so
+%{_libdir}/opensips/modules/maxfwd.so
+%{_libdir}/opensips/modules/media_exchange.so
+%{_libdir}/opensips/modules/mediaproxy.so
+%{_libdir}/opensips/modules/mi_datagram.so
+%{_libdir}/opensips/modules/mid_registrar.so
+%{_libdir}/opensips/modules/mi_fifo.so
+%{_libdir}/opensips/modules/mi_html.so
+%{_libdir}/opensips/modules/mi_script.so
+%{_libdir}/opensips/modules/mi_xmlrpc_ng.so
+%{_libdir}/opensips/modules/msilo.so
+%{_libdir}/opensips/modules/msrp_gateway.so
+%{_libdir}/opensips/modules/msrp_relay.so
+%{_libdir}/opensips/modules/msrp_ua.so
+%{_libdir}/opensips/modules/nathelper.so
+%{_libdir}/opensips/modules/nat_traversal.so
+%{_libdir}/opensips/modules/options.so
+%{_libdir}/opensips/modules/path.so
+%{_libdir}/opensips/modules/peering.so
+%{_libdir}/opensips/modules/permissions.so
+%{_libdir}/opensips/modules/pi_http.so
+%{_libdir}/opensips/modules/pike.so
+%{_libdir}/opensips/modules/presence_callinfo.so
+%{_libdir}/opensips/modules/presence_dialoginfo.so
+%{_libdir}/opensips/modules/presence_mwi.so
+%{_libdir}/opensips/modules/presence.so
+%{_libdir}/opensips/modules/presence_dfks.so
+%{_libdir}/opensips/modules/presence_xcapdiff.so
+%{_libdir}/opensips/modules/presence_xml.so
+%{_libdir}/opensips/modules/prometheus.so
+%{_libdir}/opensips/modules/proto_bin.so
+%{_libdir}/opensips/modules/proto_bins.so
+%{_libdir}/opensips/modules/proto_hep.so
+%{_libdir}/opensips/modules/proto_msrp.so
+%{_libdir}/opensips/modules/proto_sctp.so
+%{_libdir}/opensips/modules/proto_smpp.so
+%{_libdir}/opensips/modules/proto_tls.so
+%{_libdir}/opensips/modules/proto_ws.so
+%{_libdir}/opensips/modules/proto_wss.so
+%{_libdir}/opensips/modules/pua_bla.so
+%{_libdir}/opensips/modules/pua_dialoginfo.so
+%{_libdir}/opensips/modules/pua_mi.so
+%{_libdir}/opensips/modules/pua.so
+%{_libdir}/opensips/modules/pua_usrloc.so
+%{_libdir}/opensips/modules/python.so
+%{_libdir}/opensips/modules/qos.so
+%{_libdir}/opensips/modules/qrouting.so
+%{_libdir}/opensips/modules/rate_cacher.so
+%{_libdir}/opensips/modules/ratelimit.so
+%{_libdir}/opensips/modules/regex.so
+%{_libdir}/opensips/modules/registrar.so
+%{_libdir}/opensips/modules/rest_client.so
+%{_libdir}/opensips/modules/rls.so
+%{_libdir}/opensips/modules/rr.so
+%{_libdir}/opensips/modules/rtp_relay.so
+%{_libdir}/opensips/modules/rtpengine.so
+%{_libdir}/opensips/modules/rtpproxy.so
+%{_libdir}/opensips/modules/script_helper.so
+%{_libdir}/opensips/modules/signaling.so
+%{_libdir}/opensips/modules/sipcapture.so
+%{_libdir}/opensips/modules/sip_i.so
+%{_libdir}/opensips/modules/sipmsgops.so
+%{_libdir}/opensips/modules/siprec.so
+%{_libdir}/opensips/modules/sl.so
+%{_libdir}/opensips/modules/speeddial.so
+%{_libdir}/opensips/modules/sql_cacher.so
+%{_libdir}/opensips/modules/sst.so
+%{_libdir}/opensips/modules/statistics.so
+%{_libdir}/opensips/modules/status_report.so
+%{_libdir}/opensips/modules/stir_shaken.so
+%{_libdir}/opensips/modules/stun.so
+%{_libdir}/opensips/modules/tcp_mgm.so
+%{_libdir}/opensips/modules/textops.so
+%{_libdir}/opensips/modules/tls_mgm.so
+%{_libdir}/opensips/modules/tls_openssl.so
+%{_libdir}/opensips/modules/tm.so
+%{_libdir}/opensips/modules/topology_hiding.so
+%{_libdir}/opensips/modules/tracer.so
+%{_libdir}/opensips/modules/uac_auth.so
+%{_libdir}/opensips/modules/uac_redirect.so
+%{_libdir}/opensips/modules/uac_registrant.so
+%{_libdir}/opensips/modules/uac.so
+%{_libdir}/opensips/modules/userblacklist.so
+%{_libdir}/opensips/modules%{_prefix}loc.so
+%{_libdir}/opensips/modules/uuid.so
+%{_libdir}/opensips/modules/xcap_client.so
+%{_libdir}/opensips/modules/xcap.so
+%{_libdir}/opensips/modules/xml.so
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/db_berkeley
 %{_datadir}/%{name}/dbtext
@@ -679,95 +681,95 @@ fi
 
 %files xmpp
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/jabber.so
-%attr(755,root,root) %{_libdir}/opensips/modules/xmpp.so
-%attr(755,root,root) %{_libdir}/opensips/modules/pua_xmpp.so
+%{_libdir}/opensips/modules/jabber.so
+%{_libdir}/opensips/modules/xmpp.so
+%{_libdir}/opensips/modules/pua_xmpp.so
 
 %if %{with mysql}
 %files mysql
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/db_mysql.so
+%{_libdir}/opensips/modules/db_mysql.so
 %{_datadir}/%{name}/mysql
 %endif
 
 %if %{with pgsql}
 %files postgres
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/db_postgres.so
+%{_libdir}/opensips/modules/db_postgres.so
 %{_datadir}/%{name}/postgres
 %endif
 
 %if %{with sqlite}
 %files sqlite3
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/db_sqlite.so
+%{_libdir}/opensips/modules/db_sqlite.so
 %{_datadir}/opensips/sqlite
 %endif
 
 %if %{with json}
 %files json
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/json.so
+%{_libdir}/opensips/modules/json.so
 %endif
 
 %if %{with json}
 %files cgrates
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/cgrates.so
+%{_libdir}/opensips/modules/cgrates.so
 %endif
 
 %if %{with memcached}
 %files memcached
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/cachedb_memcached.so
+%{_libdir}/opensips/modules/cachedb_memcached.so
 %endif
 
 %if %{with radius}
 %files radius
 %defattr(644,root,root,755)
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/opensips/dictionary.opensips
-%attr(755,root,root) %{_libdir}/opensips/modules/aaa_radius.so
+%{_libdir}/opensips/modules/aaa_radius.so
 %endif
 
 %if %{with odbc}
 %files odbc
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/db_unixodbc.so
+%{_libdir}/opensips/modules/db_unixodbc.so
 %endif
 
 %if %{with geoip}
 %files mmgeoip
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/mmgeoip.so
+%{_libdir}/opensips/modules/mmgeoip.so
 %endif
 
 %if %{with ldap}
 %files ldap
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/h350.so
-%attr(755,root,root) %{_libdir}/opensips/modules/ldap.so
+%{_libdir}/opensips/modules/h350.so
+%{_libdir}/opensips/modules/ldap.so
 %endif
 
 %if %{with carrierroute}
 %files carrierroute
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/carrierroute.so
+%{_libdir}/opensips/modules/carrierroute.so
 %endif
 
 %if %{with osp}
 %files osp
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/osp.so
+%{_libdir}/opensips/modules/osp.so
 %endif
 
 %files snmpstats
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/snmpstats.so
+%{_libdir}/opensips/modules/snmpstats.so
 
 %files perl
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/db_perlvdb.so
-%attr(755,root,root) %{_libdir}/opensips/modules/perl.so
+%{_libdir}/opensips/modules/db_perlvdb.so
+%{_libdir}/opensips/modules/perl.so
 %{_libdir}/opensips/perl
 
 %files -n mibs-%{name}
@@ -777,26 +779,26 @@ fi
 %if %{with redis}
 %files redis
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/cachedb_redis.so
+%{_libdir}/opensips/modules/cachedb_redis.so
 %endif
 
 %if %{with microhttpd}
 %files httpd
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/httpd.so
-%attr(755,root,root) %{_libdir}/opensips/modules/mi_http.so
+%{_libdir}/opensips/modules/httpd.so
+%{_libdir}/opensips/modules/mi_http.so
 %endif
 
 %if %{with rabbitmq}
 %files rabbitmq
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/event_rabbitmq.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rabbitmq.so
-%attr(755,root,root) %{_libdir}/opensips/modules/rabbitmq_consumer.so
+%{_libdir}/opensips/modules/event_rabbitmq.so
+%{_libdir}/opensips/modules/rabbitmq.so
+%{_libdir}/opensips/modules/rabbitmq_consumer.so
 %endif
 
 %if %{with kafka}
 %files kafka
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/opensips/modules/event_kafka.so
+%{_libdir}/opensips/modules/event_kafka.so
 %endif
