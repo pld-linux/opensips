@@ -221,7 +221,7 @@ Summary:	openSIPS XMPP/Jabber modules
 Summary(pl.UTF-8):	Moduły XMPP/Jabber do openSIPS
 Group:		Networking/Daemons
 Requires:	%{name} = %{version}-%{release}
-Obsoletes:	opensips-jabber
+Obsoletes:	opensips-jabber < 1.4.1
 
 %description xmpp
 XMPP/Jabber modules for openSIPS.
@@ -295,7 +295,7 @@ Summary(pl.UTF-8):	MIB-y dla openSIPS
 Group:		Applications/System
 Requires:	mibs-dirs
 Requires:	mibs-net-snmp
-Obsoletes:	opensips-mibs
+Obsoletes:	opensips-mibs < 1.5.3-2
 
 %description -n mibs-%{name}
 MIBs for openSIPS.
