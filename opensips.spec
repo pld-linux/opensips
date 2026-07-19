@@ -1,14 +1,12 @@
 # TODO:
-# - cachedb_dynamodb + event_sqs (AWS)
 # - db_oracle
-# - http2d
 # - launch_darkly
 # - rtp.io (needs patch for shared librtpproxy)
 # - system wolfssl in tls_wolfssl module
 #
 # Conditional build:
 %bcond_without	radius		# radius aaa support
-%bcond_with	aws		# AWS services support (DynamoDB cachedb, SQS event)
+%bcond_without	aws		# AWS services support (DynamoDB cachedb, SQS event)
 %bcond_with	couchbase	# couchbase cachedb support
 %bcond_without	memcached	# memcached cachedb support
 %bcond_with	mongodb		# mongodb cachedb support
@@ -20,7 +18,7 @@
 %bcond_without	kafka		# Apache Kafka event support
 %bcond_without	rabbitmq	# Rabbit MQ event support
 %bcond_without	carrierroute	# carrierroute support
-%bcond_with	http2		# HTTP/2 support
+%bcond_without	http2		# HTTP/2 support
 %bcond_without	json		# JSON support (multiple modules)
 %bcond_without	geoip		# MaxMind GeoIP support
 %bcond_with	launchdarkly	# Launch Darkly support
@@ -134,6 +132,18 @@ Radius auth/accounting module for openSIPS.
 %description radius -l pl.UTF-8
 Moduł uwierzytelniania/rozliczania Radius do openSIPS.
 
+%package dynamodb
+Summary:	openSIPS DynamoDB module
+Summary(pl.UTF-8):	Moduł DynamoDB do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description dynamodb
+Amazon DynamoDB cachedb module for openSIPS.
+
+%description dynamodb -l pl.UTF-8
+Moduł pamięci podręcznej Amazon DynamoDB do openSIPS.
+
 %package memcached
 Summary:	openSIPS memcached module
 Summary(pl.UTF-8):	Moduł memcached do openSIPS
@@ -230,6 +240,18 @@ RabbitMQ event module for openSIPS.
 %description rabbitmq -l pl.UTF-8
 Moduł kolejki zdarzeń RabbitMQ do openSIPS.
 
+%package sqs
+Summary:	openSIPS SQS module
+Summary(pl.UTF-8):	Moduł SQS do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description sqs
+Amazon SQS event module for openSIPS.
+
+%description sqs -l pl.UTF-8
+Moduł kolejki zdarzeń Amazon SQS do openSIPS.
+
 %package carrierroute
 Summary:	openSIPS Carrierroute module
 Summary(pl.UTF-8):	Moduł Carrierroute do openSIPS
@@ -265,6 +287,18 @@ HTTP interface to openSIPS.
 
 %description httpd -l pl.UTF-8
 Interfejs HTTP do openSIPS.
+
+%package http2d
+Summary:	HTTP/2 interface to openSIPS
+Summary(pl.UTF-8):	Interfejs HTTP/2 do openSIPS
+Group:		Networking/Daemons
+Requires:	%{name} = %{version}-%{release}
+
+%description http2d
+HTTP/2 interface to openSIPS.
+
+%description http2d -l pl.UTF-8
+Interfejs HTTP/2 do openSIPS.
 
 %package json
 Summary:	openSIPS JSON module
@@ -460,7 +494,7 @@ LIB_LUA_NAME=lua5.4 \
 	HTTP2D_USE_SYSTEM=yes \
 	RADIUSCLIENT=RADIUSCLIENT \
 	Q= \
-	exclude_modules="$exclude_modules" \
+	exclude_modules="$exclude_modules"
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -469,15 +503,16 @@ install -d $RPM_BUILD_ROOT%{_sysconfdir}/{ser,sysconfig,rc.d/init.d} \
 
 exclude_modules="$(cat exclude_modules)"
 %{__make} install -j1 \
-	Q= \
-	exclude_modules="$exclude_modules" \
-	prefix=%{_prefix} \
 	BASEDIR=$RPM_BUILD_ROOT \
 	PREFIX=%{_prefix} \
 	INSTALLMIBDIR=$RPM_BUILD_ROOT%{_datadir}/mibs \
 	LIBDIR=%{_lib} \
+	prefix=%{_prefix} \
 	cfg_prefix=$RPM_BUILD_ROOT \
-	cfg_target=%{_sysconfdir}/opensips/
+	cfg_target=%{_sysconfdir}/opensips/ \
+	Q= \
+	HTTP2D_USE_SYSTEM=yes \
+	exclude_modules="$exclude_modules"
 
 for i in modules/*; do \
 	i=$(basename $i)
@@ -756,6 +791,13 @@ fi
 %{_libdir}/opensips/modules/aaa_radius.so
 %endif
 
+%if %{with aws}
+%files dynamodb
+%defattr(644,root,root,755)
+# R: aws-sdk-cpp
+%{_libdir}/opensips/modules/cachedb_dynamodb.so
+%endif
+
 %if %{with memcached}
 %files memcached
 %defattr(644,root,root,755)
@@ -801,6 +843,13 @@ fi
 %{_libdir}/opensips/modules/db_unixodbc.so
 %endif
 
+%if %{with aws}
+%files sqs
+%defattr(644,root,root,755)
+# R: aws-sdk-cpp
+%{_libdir}/opensips/modules/event_sqs.so
+%endif
+
 %if %{with kafka}
 %files kafka
 %defattr(644,root,root,755)
@@ -837,6 +886,13 @@ fi
 # R: libmicrohttpd
 %{_libdir}/opensips/modules/httpd.so
 %{_libdir}/opensips/modules/mi_http.so
+%endif
+
+%if %{with http2}
+%files http2d
+%defattr(644,root,root,755)
+# R: nghttp2
+%{_libdir}/opensips/modules/http2d.so
 %endif
 
 %if %{with json}
